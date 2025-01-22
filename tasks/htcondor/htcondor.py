@@ -2,20 +2,18 @@ import os
 
 import law
 import luigi
-from law.contrib.htcondor.job import HTCondorJobManager
-from law.util import merge_dicts
 
-from .bundle_files import BundleCMSSW, BundleRepo
+from .bundle_files import BundleRepo
 
 law.contrib.load("htcondor")
+logger = law.logger.get_logger(__name__)
 
-
-class ETPHTCondorWorkflow(law.htcondor.HTCondorWorkflow):
+class ETP_HTCondorWorkflow(law.htcondor.HTCondorWorkflow):
     # These can adjusted to the needs of the specific workflow
     htcondor_accounting_group = luigi.Parameter(
         description="ETP HTCondor accounting group jobs are submitted to.",
     )
-    htcondor_docker_image = luigi.Parameter(
+    htcondor_container_image = luigi.Parameter(
         description="Docker image to use for running docker jobs.",
     )
     htcondor_walltime = luigi.Parameter(
@@ -44,16 +42,6 @@ class ETPHTCondorWorkflow(law.htcondor.HTCondorWorkflow):
         significant=False, # makes it not show up in the task representation
         description="ETP HTCondor specific flag to allow jobs to run on remote resources (NEMO, TOPAS).",
     )
-    htcondor_universe = luigi.Parameter(
-        default="docker",
-        significant=False, # makes it not show up in the task representation
-        description="HTcondor universe to run jobs in.",
-    )
-    bootstrap_file = luigi.Parameter(
-        default="bootstrap.sh",
-        significant=False, # makes it not show up in the task representation
-        description="Path to the source script providing the software environment to source at job start.",
-    )
     
     # set Law options
     # output_collection_cls = law.SiblingFileCollection # is this needed? It's not used by law at all
@@ -67,18 +55,18 @@ class ETPHTCondorWorkflow(law.htcondor.HTCondorWorkflow):
 
     def htcondor_bootstrap_file(self):
         """Path to the bootstrap file thats used to setup the environment in the docker containers."""
-        bootstrap_file = law.util.rel_path(__file__, self.bootstrap_file)
+        bootstrap_file = law.util.rel_path(__file__, "bootstrap.sh")
         return law.JobInputFile(bootstrap_file, share=True, render_job=True)
 
     def htcondor_workflow_requires(self):
         """Adds the repo and software bundling as requirements """
-        reqs = law.htcondor.HTCondorWorkflow.htcondor_workflow_requires(self)
+        reqs = super().htcondor_workflow_requires()
 
         # add repo and software bundling as requirements when getenv is not requested
-        reqs["repo"] = BundleRepo.req(self)
-        # reqs["cmssw"] = BundleCMSSW.req(self)
-
+        reqs["repo"] = BundleRepo.req(self, _exclude=["custom_checksum"]) # exclude custom_checksum, which is used for cmssw bundles
         return reqs
+            
+    
 
     def htcondor_job_config(self, config, job_num, branches):
         """"""
@@ -87,7 +75,7 @@ class ETPHTCondorWorkflow(law.htcondor.HTCondorWorkflow):
         config.stdout = os.path.join("Output.txt")
         config.stderr = os.path.join("Error.txt")
 
-        config.universe = "docker"
+        config.universe = "container"
         
         config.custom_content = [
             ("accounting_group", self.htcondor_accounting_group),
@@ -95,7 +83,7 @@ class ETPHTCondorWorkflow(law.htcondor.HTCondorWorkflow):
             ("stream_output", "True"),  #,
             ("Requirements", self.htcondor_requirements),
             ("+RemoteJob", self.htcondor_remote_job),
-            ("docker_image", self.htcondor_docker_image),
+            ("container_image", self.htcondor_container_image),
             ("+RequestWalltime", self.htcondor_walltime),
             ("x509userproxy", law.wlcg.get_vomsproxy_file()),
             ("request_cpus", self.htcondor_request_cpus),
@@ -117,10 +105,13 @@ class ETPHTCondorWorkflow(law.htcondor.HTCondorWorkflow):
             """Extracts the filepath and filepattern of the bundle files from the bundle tasks.
             Taken from https://github.com/columnflow/columnflow/blob/master/columnflow/tasks/framework/remote.py#L388
             """
+            # the path to the bundled CMSSW directory archives e.g.: 
+            # 'root://cmsdcache-kit-disk.gridka.de:1094//store/user/<user>/run3_embedding/bundles'
             uris = task.output().dir.uri(return_all=True)
+            # the pattern for the filenames with a star as placeholder e.g.: CMSSW_14_2_0_pre3.7e6ac64.*.tgz
             pattern = os.path.basename(task.get_file_pattern())
             return ",".join(uris), pattern
-
+        
         reqs = self.htcondor_workflow_requires()
 
         # add repo bundle variables
@@ -129,10 +120,5 @@ class ETPHTCondorWorkflow(law.htcondor.HTCondorWorkflow):
         config.render_variables["repo_pattern"] = pattern
         config.render_variables["user"] = os.environ["USER"]
         config.render_variables["lcg_stack"] = self.lcg_stack
-
-        # add cmssw bundle variables
-        # uris, pattern = get_bundle_info(reqs["cmssw"])
-        # config.render_variables["cmssw_uris"] = uris
-        # config.render_variables["cmssw_pattern"] = pattern
 
         return config

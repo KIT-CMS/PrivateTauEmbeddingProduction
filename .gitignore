@@ -163,4 +163,8 @@ cython_debug/
 
 # law
 .law_tmp/
-jobs/
+law/*/__pycache__/
+luigi/*/__pycache__/
+*/__pycache__/
+jobs*
+.vscode

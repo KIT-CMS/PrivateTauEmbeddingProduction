@@ -4,11 +4,11 @@ import law
 import luigi
 from luigi.util import inherits
 
-from ..htcondor.htcondor import ETPHTCondorWorkflow
+from ..htcondor.htcondor import ETP_HTCondorWorkflow
 
 # logger = law.logger.get_logger(__name__) 
 
-class CreateNumberFiles(ETPHTCondorWorkflow, law.LocalWorkflow):
+class CreateNumberFiles(ETP_HTCondorWorkflow, law.LocalWorkflow):
     """
     Creates <number> files with a the <number> in them. 
     for more info on law workflows see: https://law.readthedocs.io/en/latest/workflows.html
@@ -27,7 +27,7 @@ class CreateNumberFiles(ETPHTCondorWorkflow, law.LocalWorkflow):
 
 
 @inherits(CreateNumberFiles)
-class CollectNumbers(ETPHTCondorWorkflow, law.LocalWorkflow):
+class CollectNumbers(ETP_HTCondorWorkflow, law.LocalWorkflow):
     """
     Sum up the numbers created in the CreateNumberFiles tasks.
     Depending on the number of branches specified in num_branches, the numbers are summed up in chunks.
