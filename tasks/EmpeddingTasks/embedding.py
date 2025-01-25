@@ -9,6 +9,11 @@ from ..htcondor.cmssw import ETP_CMSSW_HTCondorWorkflow
 
 logger = law.logger.get_logger(__name__)
 
+#
+# CMSSW versions:
+#  - CMSSW_13_0_17: Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50
+#  - CMSSW_12_4_11_patch3: The CMSSW version used in MC production for 2022 DY samples  Taken from https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_setup/EGM-Run3Summer22EEDRPremix-00004 from this chain https://cms-pdmv-prod.web.cern.ch/mcm/chained_requests?prepid=EGM-chain_Run3Summer22EEwmLHEGS_flowRun3Summer22EEDRPremix_flowRun3Summer22EEMiniAODv4_flowRun3Summer22EENanoAODv12-00001&page=0&shown=15
+
 
 class EmbeddingTask(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
     """This class combines common functionality for embedding Tasks"""
@@ -23,15 +28,13 @@ class EmbeddingTask(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
         description="Number of files to process per job. This has no effect in the PreselectionTask.",
     )
 
-    cmssw_version = luigi.Parameter(
-        default="CMSSW_14_1_0_pre6",
-        description="The CMSSW version to use for the cmsdriver command.",
-    )
+    # cmssw_version = luigi.Parameter(
+    #     description="The CMSSW version to use for the cmsdriver command.",
+    # )
     
-    cmssw_scram_arch = luigi.Parameter(
-        default="el8_amd64_gcc11",
-        description="The CMSSW scram arch.",
-    )
+    # cmssw_scram_arch = luigi.Parameter(
+    #     description="The CMSSW scram arch.",
+    # )
 
     RequiredTask = None
 
@@ -86,10 +89,6 @@ class PreselectionTask(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
         description="List of input files.",
     )
 
-    # cmssw_version = luigi.Parameter(
-    #     default="CMSSW_14_1_0_pre6",
-    #     description="The CMSSW version to use for the cmsdriver command.",
-    # )
     cmssw_version = luigi.Parameter(
         default="CMSSW_13_0_17",
         description="The CMSSW version to use for the cmsdriver command.",
@@ -133,6 +132,10 @@ class SelectionTask(EmbeddingTask):
 
     RequiredTask = PreselectionTask
 
+    cmssw_scram_arch = luigi.Parameter(
+        default="el8_amd64_gcc11",
+        description="The CMSSW scram arch.",
+    )
     cmssw_version = luigi.Parameter(
         default="CMSSW_13_0_17",
         description="The CMSSW version to use for the cmsdriver command.",
@@ -163,7 +166,11 @@ class SelectionTask(EmbeddingTask):
 class CleaningTask(EmbeddingTask):
 
     RequiredTask = SelectionTask
-
+    
+    cmssw_scram_arch = luigi.Parameter(
+        default="el8_amd64_gcc11",
+        description="The CMSSW scram arch.",
+    )
     cmssw_version = luigi.Parameter(
         default="CMSSW_13_0_17",
         description="The CMSSW version to use for the cmsdriver command.",
@@ -196,24 +203,15 @@ class CleaningTask(EmbeddingTask):
 
 class GenSimTask(EmbeddingTask):
     
-    # cmssw_version = luigi.Parameter(
-    #     default="CMSSW_12_4_11_patch3",
-    #     description="The CMSSW version to use for the cmsdriver command.",
-    # )
-    # """
-    # The needed CMSSW version for this task.
-    # Taken from https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_setup/EGM-Run3Summer22EEDRPremix-00004 
-    # from this chain https://cms-pdmv-prod.web.cern.ch/mcm/chained_requests?prepid=EGM-chain_Run3Summer22EEwmLHEGS_flowRun3Summer22EEDRPremix_flowRun3Summer22EEMiniAODv4_flowRun3Summer22EENanoAODv12-00001&page=0&shown=15
-    # """
     cmssw_scram_arch = luigi.Parameter(
-        default="el8_amd64_gcc10",
+        default="el8_amd64_gcc11",
         description="The CMSSW scram arch.",
     )
     cmssw_version = luigi.Parameter(
-        default="CMSSW_13_0_6",
+        default="CMSSW_13_0_17",
         description="The CMSSW version to use for the cmsdriver command.",
     )
-    """ The last CMSSW which contains the HLT step HLT:2022v15, see https://github.com/cms-sw/cmssw/tree/CMSSW_13_0_6/HLTrigger/Configuration/python"""
+    """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
 
     RequiredTask = CleaningTask
 
@@ -238,7 +236,7 @@ class GenSimTask(EmbeddingTask):
                 "'"
                 """process.generator.HepMCFilter.filterParameters.MuMuCut = cms.string("(Mu1.Pt > 17 && Mu2.Pt > 8 && Mu1.Eta < 2.5 && Mu2.Eta < 2.5)");"""
                 """process.generator.HepMCFilter.filterParameters.Final_States = cms.vstring("MuMu");"""
-                """process.generator.nAttempts = cms.uint32(1)"""
+                """process.generator.nAttempts = cms.uint32(1);"""
                 "'"
             ),
             filein=",".join(self.get_input_files()),
@@ -248,25 +246,19 @@ class GenSimTask(EmbeddingTask):
 
 class HLTSimTask(EmbeddingTask):
 
-    # cmssw_version = luigi.Parameter(
-    #     default="CMSSW_12_4_11_patch3",
-    #     description="The CMSSW version to use for the cmsdriver command.",
-    # )
-    # """
-    # The needed CMSSW version for this task.
-    # Taken from https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_setup/EGM-Run3Summer22EEDRPremix-00004 
-    # from this chain https://cms-pdmv-prod.web.cern.ch/mcm/chained_requests?prepid=EGM-chain_Run3Summer22EEwmLHEGS_flowRun3Summer22EEDRPremix_flowRun3Summer22EEMiniAODv4_flowRun3Summer22EENanoAODv12-00001&page=0&shown=15
-    # """
+    cmssw_version = luigi.Parameter(
+        default="CMSSW_12_4_11_patch3",
+        description="The CMSSW version to use for the cmsdriver command.",
+    )
+    """
+    The needed CMSSW version for this task.
+    Taken from https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_setup/EGM-Run3Summer22EEDRPremix-00004 
+    from this chain https://cms-pdmv-prod.web.cern.ch/mcm/chained_requests?prepid=EGM-chain_Run3Summer22EEwmLHEGS_flowRun3Summer22EEDRPremix_flowRun3Summer22EEMiniAODv4_flowRun3Summer22EENanoAODv12-00001&page=0&shown=15
+    """
     cmssw_scram_arch = luigi.Parameter(
         default="el8_amd64_gcc10",
         description="The CMSSW scram arch.",
     )
-    cmssw_version = luigi.Parameter(
-        default="CMSSW_13_0_6",
-        description="The CMSSW version to use for the cmsdriver command.",
-    )
-    """ The last CMSSW which contains the HLT step HLT:2022v15, see https://github.com/cms-sw/cmssw/tree/CMSSW_13_0_6/HLTrigger/Configuration/python"""
-
     RequiredTask = GenSimTask
 
     def output(self):
@@ -287,12 +279,23 @@ class HLTSimTask(EmbeddingTask):
             eventcontent="RAWSIM",
             datatier="RAWSIM",
             customise="TauAnalysis/MCEmbeddingTools/customisers.customiseGenerator_HLT_Reselect",
+            customise_commands="'process.source.bypassVersionCheck = cms.untracked.bool(True);'",
             filein=",".join(self.get_input_files()),
             number=self.emb_number_of_events,
         )
 
 
 class RecoSimTask(EmbeddingTask):
+    
+    cmssw_scram_arch = luigi.Parameter(
+        default="el8_amd64_gcc11",
+        description="The CMSSW scram arch.",
+    )
+    cmssw_version = luigi.Parameter(
+        default="CMSSW_13_0_17",
+        description="The CMSSW version to use for the cmsdriver command.",
+    )
+    """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
 
     RequiredTask = HLTSimTask
 
@@ -319,6 +322,16 @@ class RecoSimTask(EmbeddingTask):
 
 
 class MergingTask(EmbeddingTask):
+    
+    cmssw_scram_arch = luigi.Parameter(
+        default="el8_amd64_gcc11",
+        description="The CMSSW scram arch.",
+    )
+    cmssw_version = luigi.Parameter(
+        default="CMSSW_13_0_17",
+        description="The CMSSW version to use for the cmsdriver command.",
+    )
+    """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
 
     RequiredTask = RecoSimTask
 
@@ -337,6 +350,39 @@ class MergingTask(EmbeddingTask):
             eventcontent="MINIAODSIM",
             datatier="USER",
             customise="TauAnalysis/MCEmbeddingTools/customisers.customiseMerging_Reselect",
+            filein=",".join(self.get_input_files()),
+            number=self.emb_number_of_events,
+        )
+
+class NanoAODTask(EmbeddingTask):
+    
+    cmssw_scram_arch = luigi.Parameter(
+        default="el8_amd64_gcc11",
+        description="The CMSSW scram arch.",
+    )
+    cmssw_version = luigi.Parameter(
+        default="CMSSW_13_0_17",
+        description="The CMSSW version to use for the cmsdriver command.",
+    )
+    """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
+
+    RequiredTask = MergingTask
+
+    def output(self):
+        """The path to the files the cmsdriver command is going to create"""
+        return law.wlcg.WLCGFileTarget(f"2022/merging/{self.branch}_merging.root")
+
+    def run(self):
+        """Run the merging cmsdriver command"""
+        self.run_cms_driver(
+            "",
+            step="NANO",
+            data=True,
+            conditions="auto:run3_data",
+            era="Run3",
+            eventcontent="NANOAODSIM",
+            datatier="NANOAODSIM",
+            customise="TauAnalysis/MCEmbeddingTools/customisers.customiseNanoAOD",
             filein=",".join(self.get_input_files()),
             number=self.emb_number_of_events,
         )

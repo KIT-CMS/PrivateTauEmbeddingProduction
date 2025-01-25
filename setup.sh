@@ -21,6 +21,7 @@ export BASE_DIR LAW_HOME LAW_CONFIG_FILE
 
 ####### setup law and luigi #######
 # add law and luigi to the path & python path
+add_to_pythonpath "$BASE_DIR" #needed so that the tasks can be imported
 add_to_pythonpath "$BASE_DIR/luigi"
 add_to_pythonpath "$BASE_DIR/law"
 
