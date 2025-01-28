@@ -228,7 +228,7 @@ class GenSimTask(EmbeddingTask):
             beamspot="Realistic25ns13p6TeVEarly2022Collision",
             geometry="DB:Extended",
             era="Run3",
-            conditions="140X_mcRun3_2022_realistic_v3",
+            conditions="124X_mcRun3_2022_realistic_postEE_v1", # same Global Tag as in HLTSimTask!
             eventcontent="RAWSIM",
             datatier="RAWSIM",
             customise="TauAnalysis/MCEmbeddingTools/customisers.customiseGenerator_preHLT_Reselect",
@@ -270,7 +270,7 @@ class HLTSimTask(EmbeddingTask):
         # step and conditions taken from https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_setup/EGM-Run3Summer22EEDRPremix-00004 (see recomended sample: https://twiki.cern.ch/twiki/bin/viewauth/CMS/MuonRun32022#MC)
         self.run_cms_driver(
             "TauAnalysis/MCEmbeddingTools/python/EmbeddingPythia8Hadronizer_cfi.py",
-            step="HLT:2022v15",
+            step="HLT:2022v14",
             mc=True,
             beamspot="Realistic25ns13TeVEarly2018Collision",
             geometry="DB:Extended",
@@ -288,11 +288,11 @@ class HLTSimTask(EmbeddingTask):
 class RecoSimTask(EmbeddingTask):
     
     cmssw_scram_arch = luigi.Parameter(
-        default="el8_amd64_gcc11",
+        default="el8_amd64_gcc10",
         description="The CMSSW scram arch.",
     )
     cmssw_version = luigi.Parameter(
-        default="CMSSW_13_0_17",
+        default="CMSSW_12_4_11_patch3",
         description="The CMSSW version to use for the cmsdriver command.",
     )
     """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
@@ -312,10 +312,11 @@ class RecoSimTask(EmbeddingTask):
             beamspot="Realistic25ns13TeVEarly2018Collision",
             geometry="DB:Extended",
             era="Run3",
-            conditions="140X_mcRun3_2022_realistic_v3",
+            conditions="124X_mcRun3_2022_realistic_postEE_v1",
             eventcontent="RAWRECOSIMHLT",
             datatier="RAW-RECO-SIM",
             customise="TauAnalysis/MCEmbeddingTools/customisers.customiseGenerator_postHLT_Reselect",
+            customise_commands="'process.source.bypassVersionCheck = cms.untracked.bool(True);'",
             filein=",".join(self.get_input_files()),
             number=self.emb_number_of_events,
         )
@@ -370,7 +371,7 @@ class NanoAODTask(EmbeddingTask):
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2022/merging/{self.branch}_merging.root")
+        return law.wlcg.WLCGFileTarget(f"2022/nanoaod/{self.branch}_nanoaod.root")
 
     def run(self):
         """Run the merging cmsdriver command"""

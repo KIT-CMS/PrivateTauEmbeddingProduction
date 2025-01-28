@@ -5,8 +5,8 @@
 export USER="{{user}}"
 # set the base directory where the repo and cmssw are stored
 export BASE_DIR="${PWD}/repo"
-# set CMSSW version
-export cmssw_version="{{cmssw_version}}"
+# set CMSSW branch
+export cmssw_branch="embedding_update_for_run3_{{cmssw_version}}"
 
 # source the law wlcg tools, mainly for law_wlcg_get_file
 source "{{wlcg_tools}}" "" || return "$?"
@@ -24,7 +24,7 @@ source "{{wlcg_tools}}" "" || return "$?"
 
 # setup cmssw
 (
-    source /cvmfs/cms.cern.ch/cmsset_default.sh
+    source /cvmfs/cms.cern.ch/cmsset_default.sh || return $?
     cd "${BASE_DIR}" || return $?
     export SCRAM_ARCH="{{cmssw_scram_arch}}"
     # check if the cmssw version is already set up else set it up
@@ -32,27 +32,23 @@ source "{{wlcg_tools}}" "" || return "$?"
         echo "################ {{cmssw_version}} is already set up ################"
     else
         echo "################ Setting up {{cmssw_version}} ################"
-        cmsrel "{{cmssw_version}}"
+        cmsrel "{{cmssw_version}}" || return $?
     fi
 
     cd "{{cmssw_version}}/src" || return $?
-    cmsenv
+    cmsenv || return $?
 
-    # init git if not already done
     # git init itself does not work. It needs to be done with git cms-init
-    if [ ! -d .git ]; then
-        git cms-init --upstream-only # --upstream-only is used to avoid checking for a personal cmmsw fork and the personal git name/email etc are not needed
-        # git clone --no-checkout --depth 1 --sparse -b embedding_update_for_run3 git@github.com:KIT-CMS/cmssw.git .
-    fi
+    git cms-init --upstream-only # --upstream-only is used to avoid checking for a personal cmmsw fork and the personal git name/email etc are not needed
 
-    # needed_packages=(TauAnalysis/MCEmbeddingTools DataFormats/GsfTrackReco)
-    git sparse-checkout set TauAnalysis/MCEmbeddingTools DataFormats/GsfTrackReco
+    # CMSSW folders which contain special code changes in the embedding $cmssw_branch
+    git sparse-checkout set TauAnalysis/MCEmbeddingTools DataFormats/GsfTrackReco RecoEgamma/EgammaPhotonAlgos RecoEgamma/EgammaElectronProducers || return $?
 
 
     echo "################ Get dev changes form KIT-CMS ################"
-    git remote add kit-cms https://github.com/KIT-CMS/cmssw.git
-    git fetch kit-cms embedding_update_for_run3_{{cmssw_version}} || return $?
-    git switch embedding_update_for_run3
+    git remote add kit-cms https://github.com/KIT-CMS/cmssw.git || return $?
+    git fetch kit-cms $cmssw_branch || return $?
+    git switch $cmssw_branch || return $?
 
     echo "################ Compiling with {{n_compile_cores}} cores################"
     scram b -j {{n_compile_cores}} || return $?
