@@ -21,6 +21,7 @@ class SelectionTask2022postEE(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
     )
 
     emb_filelist = luigi.Parameter(
+        default= "Muon_Run2022G-v1_RAW_test.filelist",
         description="List of input files.",
     )
 

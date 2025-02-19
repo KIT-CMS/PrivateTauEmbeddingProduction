@@ -1,4 +1,5 @@
 import os
+from abc import abstractmethod
 
 import law
 import luigi
@@ -9,6 +10,38 @@ law.contrib.load("htcondor")
 logger = law.logger.get_logger(__name__)
 
 class ETP_HTCondorWorkflow(law.htcondor.HTCondorWorkflow):
+    """
+    Abstract class for ETP HTCondor workflows. It extends the HTCondorWorkflow class from law.
+    The following parameters need to be set in the derived class:
+    
+    htcondor_accounting_group: 
+        ETP HTCondor accounting group jobs are submitted to.
+    htcondor_container_image: 
+        Docker image to use for running docker jobs.
+    htcondor_walltime: 
+        Requested walltime for the jobs.
+    htcondor_request_cpus: 
+        Number of CPU cores to request for each job.
+    htcondor_request_memory: 
+        Amount of memory to request for each job.
+    htcondor_request_disk: 
+        Amount of disk scratch space to request for each job.
+    lcg_stack: 
+        LCG stack to use for the job.
+    
+    The following parameters have a default value and are not expected to be changed for most workflows:
+    
+    htcondor_requirements: 
+        Additional requirements on e.g. the target machines to run the jobs.
+        default="(TARGET.ProvidesCPU)&&(TARGET.ProvidesIO)"
+    htcondor_remote_job: 
+        ETP HTCondor specific flag to allow jobs to run on remote resources (NEMO, TOPAS).
+        default="True"
+        
+    The following methods need to be implemented in the derived class:
+    
+    
+    """
     # These can adjusted to the needs of the specific workflow
     htcondor_accounting_group = luigi.Parameter(
         description="ETP HTCondor accounting group jobs are submitted to.",
@@ -65,8 +98,6 @@ class ETP_HTCondorWorkflow(law.htcondor.HTCondorWorkflow):
         # add repo and software bundling as requirements when getenv is not requested
         reqs["repo"] = BundleRepo.req(self, _exclude=["custom_checksum"]) # exclude custom_checksum, which is used for cmssw bundles
         return reqs
-            
-    
 
     def htcondor_job_config(self, config, job_num, branches):
         """"""

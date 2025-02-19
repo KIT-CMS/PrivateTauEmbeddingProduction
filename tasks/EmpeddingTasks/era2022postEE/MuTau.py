@@ -79,7 +79,7 @@ class HLTSimTaskMuTau2022postEE(EmbeddingTask):
             "TauAnalysis/MCEmbeddingTools/python/EmbeddingPythia8Hadronizer_cfi.py",
             step="HLT:2022v14",
             mc=True,
-            beamspot="Realistic25ns13TeVEarly2018Collision",
+            beamspot="Realistic25ns13p6TeVEarly2022Collision",
             geometry="DB:Extended",
             era="Run3",
             conditions="124X_mcRun3_2022_realistic_postEE_v1",
@@ -116,7 +116,7 @@ class RecoSimTaskMuTau2022postEE(EmbeddingTask):
             "TauAnalysis/MCEmbeddingTools/python/EmbeddingPythia8Hadronizer_cfi.py",
             step="RAW2DIGI,L1Reco,RECO,RECOSIM",
             mc=True,
-            beamspot="Realistic25ns13TeVEarly2018Collision",
+            beamspot="Realistic25ns13p6TeVEarly2022Collision",
             geometry="DB:Extended",
             era="Run3",
             conditions="124X_mcRun3_2022_realistic_postEE_v1",
@@ -130,6 +130,11 @@ class RecoSimTaskMuTau2022postEE(EmbeddingTask):
 
 
 class MergingTaskMuTau2022postEE(EmbeddingTask):
+    
+    emb_files_per_job = luigi.IntParameter(
+        default=5,
+        description="Number of files to process per job.",
+    )
     
     cmssw_scram_arch = luigi.Parameter(
         default="el8_amd64_gcc11",
