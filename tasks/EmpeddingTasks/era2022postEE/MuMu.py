@@ -17,7 +17,7 @@ class GenSimTaskMuMu2022postEE(EmbeddingTask):
         description="The CMSSW scram arch.",
     )
     cmssw_version = luigi.Parameter(
-        default="CMSSW_13_0_17",
+        default="CMSSW_13_0_23",
         description="The CMSSW version to use for the cmsdriver command.",
     )
     """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
@@ -56,7 +56,7 @@ class GenSimTaskMuMu2022postEE(EmbeddingTask):
 class HLTSimTaskMuMu2022postEE(EmbeddingTask):
 
     cmssw_version = luigi.Parameter(
-        default="CMSSW_12_4_11_patch3",
+        default="CMSSW_12_4_23",
         description="The CMSSW version to use for the cmsdriver command.",
     )
     """
@@ -97,11 +97,11 @@ class HLTSimTaskMuMu2022postEE(EmbeddingTask):
 class RecoSimTaskMuMu2022postEE(EmbeddingTask):
     
     cmssw_scram_arch = luigi.Parameter(
-        default="el8_amd64_gcc10",
+        default="el8_amd64_gcc11",
         description="The CMSSW scram arch.",
     )
     cmssw_version = luigi.Parameter(
-        default="CMSSW_12_4_11_patch3",
+        default="CMSSW_13_0_23",
         description="The CMSSW version to use for the cmsdriver command.",
     )
     """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
@@ -138,7 +138,7 @@ class MergingTaskMuMu2022postEE(EmbeddingTask):
         description="The CMSSW scram arch.",
     )
     cmssw_version = luigi.Parameter(
-        default="CMSSW_13_0_17",
+        default="CMSSW_13_0_23",
         description="The CMSSW version to use for the cmsdriver command.",
     )
     """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
@@ -176,7 +176,7 @@ class NanoAODTaskMuMu2022postEE(EmbeddingTask):
         description="The CMSSW scram arch.",
     )
     cmssw_version = luigi.Parameter(
-        default="CMSSW_13_0_17",
+        default="CMSSW_13_0_23",
         description="The CMSSW version to use for the cmsdriver command.",
     )
     """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""

@@ -26,7 +26,7 @@ class SelectionTask2022postEE(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
     )
 
     cmssw_version = luigi.Parameter(
-        default="CMSSW_13_0_17",
+        default="CMSSW_13_0_23",
         description="The CMSSW version to use for the cmsdriver command.",
     )
     """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
@@ -72,7 +72,7 @@ class CleaningTaskMuMu2022postEE(EmbeddingTask):
         description="The CMSSW scram arch.",
     )
     cmssw_version = luigi.Parameter(
-        default="CMSSW_13_0_17",
+        default="CMSSW_13_0_23",
         description="The CMSSW version to use for the cmsdriver command.",
     )
     """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
@@ -110,7 +110,7 @@ class CleaningTaskTauTau2022postEE(EmbeddingTask):
         description="The CMSSW scram arch.",
     )
     cmssw_version = luigi.Parameter(
-        default="CMSSW_13_0_17",
+        default="CMSSW_13_0_23",
         description="The CMSSW version to use for the cmsdriver command.",
     )
     """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
