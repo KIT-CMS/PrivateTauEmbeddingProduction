@@ -161,6 +161,24 @@ class ETP_CMSSW_HTCondorWorkflow(ETP_HTCondorWorkflow):
     cmssw_scram_arch = luigi.Parameter(
         description="CMSSW scram architecture.",
     )
+    tolerance = luigi.FloatParameter(
+        default=0.5,
+        significant=False,
+        description="number of failed tasks to still consider the task successful; relative "
+        "fraction (<= 1) or absolute value (> 1); default: 0.0",
+    )
+    
+    exclude_params_req = set(
+        [
+            "emb_files_per_job",
+            "retries",
+            "htcondor_walltime",
+            "htcondor_request_cpus",
+            "htcondor_request_memory",
+            "htcondor_request_disk",
+        ]
+    )
+    """These parameters are not overwritten by the reqs() method."""
 
     def htcondor_workflow_requires(self):
         """Adds the repo and software bundling as requirements"""

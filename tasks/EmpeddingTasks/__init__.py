@@ -60,8 +60,9 @@ class EmbeddingTask(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
         # get the input files from the output of the PreselectionTask
         # this is a bit complicated as the output of a Workflow Task is in a dictionarry with the key 'collection'
         # and the value is a law.SiblingFileCollection
-        return [
+        all_files = [
             wlcg_target.uri()
             for wlcg_target in self.input()["collection"].targets.values()
         ]
+        return [all_files[i] for i in self.branch_data]
 
