@@ -96,13 +96,18 @@ class HLTSimTaskMuMu2022postEE(EmbeddingTask):
 
 class RecoSimTaskMuMu2022postEE(EmbeddingTask):
     
-    cmssw_scram_arch = luigi.Parameter(
-        default="el8_amd64_gcc11",
-        description="The CMSSW scram arch.",
-    )
     cmssw_version = luigi.Parameter(
-        default="CMSSW_13_0_23",
+        default="CMSSW_12_4_23",
         description="The CMSSW version to use for the cmsdriver command.",
+    )
+    """
+    The needed CMSSW version for this task.
+    Taken from https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_setup/EGM-Run3Summer22EEDRPremix-00004 
+    from this chain https://cms-pdmv-prod.web.cern.ch/mcm/chained_requests?prepid=EGM-chain_Run3Summer22EEwmLHEGS_flowRun3Summer22EEDRPremix_flowRun3Summer22EEMiniAODv4_flowRun3Summer22EENanoAODv12-00001&page=0&shown=15
+    """
+    cmssw_scram_arch = luigi.Parameter(
+        default="el8_amd64_gcc10",
+        description="The CMSSW scram arch.",
     )
     """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
 
