@@ -163,7 +163,6 @@ class ETP_CMSSW_HTCondorWorkflow(ETP_HTCondorWorkflow):
     )
     tolerance = luigi.FloatParameter(
         default=0.5,
-        significant=False,
         description="number of failed tasks to still consider the task successful; relative "
         "fraction (<= 1) or absolute value (> 1); default: 0.0",
     )

@@ -37,7 +37,7 @@ class EmbeddingTask(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
             "htcondor_request_disk",
         ]
     )
-    """These parameters are not overwritten by the BundleCMSSWTask.reqs() method."""
+    """These parameters are not overwritten by the reqs() method."""
 
     def create_branch_map(self):
         """Maps `self.emb_files_per_job number` of files to one job using the get_all_branch_chunks method from law."""
@@ -48,7 +48,6 @@ class EmbeddingTask(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
 
     def workflow_requires(self):
         """Requires the RequiredTask"""
-        # exclude the cmssw_version parameter, as we want to set it seperately
         return {"files": self.RequiredTask()}
 
     def requires(self):

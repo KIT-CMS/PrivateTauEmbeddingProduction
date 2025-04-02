@@ -38,7 +38,7 @@ class SelectionTask2022postEE(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
         """This branch map maps one file from the filelist in the filelists folder to one job (branch)"""
         filelist_path = law.util.rel_path(__file__, "filelists", self.emb_filelist)
         with open(filelist_path, "r") as f:
-            files = {i.strip() for i in f.readlines() if i.strip()}
+            files = [i.strip() for i in f.readlines() if i.strip()]
         return {i: file for i, file in enumerate(files)}
 
     def output(self):
@@ -49,6 +49,7 @@ class SelectionTask2022postEE(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
 
     def run(self):
         """Run the selection cmsdriver command"""
+        logger.warning(self.branch_data)
         self.run_cms_driver(
             "RECO",
             data=True,

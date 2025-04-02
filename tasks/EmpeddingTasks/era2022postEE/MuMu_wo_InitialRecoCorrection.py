@@ -3,14 +3,49 @@ import law
 import luigi
 from tasks.EmpeddingTasks import EmbeddingTask
 from tasks.EmpeddingTasks.era2022postEE.select_and_clean import (
-    CleaningTaskMuMu2022postEE,
+    SelectionTask2022postEE,
 )
 
 logger = law.logger.get_logger(__name__)
 
+class CleaningTaskMuMu2022postEEWOInitialRecoCorrection(EmbeddingTask):
 
+    RequiredTask = SelectionTask2022postEE
+    
+    cmssw_scram_arch = luigi.Parameter(
+        default="el8_amd64_gcc11",
+        description="The CMSSW scram arch.",
+    )
+    cmssw_version = luigi.Parameter(
+        default="CMSSW_13_0_23",
+        description="The CMSSW version to use for the cmsdriver command.",
+    )
+    """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
+    
+    def output(self):
+        """The path to the files the cmsdriver command is going to create"""
+        return law.wlcg.WLCGFileTarget(f"2022postEE/MuMu_wo_InitialRecoCorrection/cleaning/{self.branch}_cleaning.root")
 
-class GenSimTaskMuMu2022postEE(EmbeddingTask):
+    def run(self):
+        """Run the cleaning cmsdriver command"""
+        self.run_cms_driver(
+            "LHEprodandCLEAN",
+            data=True,
+            step="RAW2DIGI,RECO,PAT",
+            scenario="pp",
+            conditions="auto:run3_data",
+            era="Run3",
+            eventcontent="RAWRECO",
+            datatier="RAWRECO",
+            customise="TauAnalysis/MCEmbeddingTools/customisers.customiseLHEandCleaning",
+            customise_commands=(  # configs for Mu->Mu embedding
+                "'process.externalLHEProducer.particleToEmbed = cms.int32(13)'"
+            ),
+            filein=",".join(self.get_input_files()),
+            number=self.emb_number_of_events,
+        )
+
+class GenSimTaskMuMu2022postEEWOInitialRecoCorrection(EmbeddingTask):
     
     emb_files_per_job = luigi.IntParameter(
         default=3,
@@ -27,11 +62,11 @@ class GenSimTaskMuMu2022postEE(EmbeddingTask):
     )
     """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
 
-    RequiredTask = CleaningTaskMuMu2022postEE
+    RequiredTask = CleaningTaskMuMu2022postEEWOInitialRecoCorrection
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2022postEE/MuMu/gensim/{self.branch}_gensim.root")
+        return law.wlcg.WLCGFileTarget(f"2022postEE/MuMu_wo_InitialRecoCorrection/gensim/{self.branch}_gensim.root")
 
     def run(self):
         """Run the gen cmsdriver command"""
@@ -58,7 +93,7 @@ class GenSimTaskMuMu2022postEE(EmbeddingTask):
         )
 
 
-class HLTSimTaskMuMu2022postEE(EmbeddingTask):
+class HLTSimTaskMuMu2022postEEWOInitialRecoCorrection(EmbeddingTask):
 
     cmssw_version = luigi.Parameter(
         default="CMSSW_12_4_23",
@@ -73,11 +108,11 @@ class HLTSimTaskMuMu2022postEE(EmbeddingTask):
         default="el8_amd64_gcc10",
         description="The CMSSW scram arch.",
     )
-    RequiredTask = GenSimTaskMuMu2022postEE
+    RequiredTask = GenSimTaskMuMu2022postEEWOInitialRecoCorrection
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2022postEE/MuMu/hltsim/{self.branch}_hltsim.root")
+        return law.wlcg.WLCGFileTarget(f"2022postEE/MuMu_wo_InitialRecoCorrection/hltsim/{self.branch}_hltsim.root")
 
     def run(self):
         """Run the hlt cmsdriver command"""
@@ -99,7 +134,7 @@ class HLTSimTaskMuMu2022postEE(EmbeddingTask):
         )
 
 
-class RecoSimTaskMuMu2022postEE(EmbeddingTask):
+class RecoSimTaskMuMu2022postEEWOInitialRecoCorrection(EmbeddingTask):
     
     cmssw_version = luigi.Parameter(
         default="CMSSW_12_4_23",
@@ -116,11 +151,11 @@ class RecoSimTaskMuMu2022postEE(EmbeddingTask):
     )
     """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
 
-    RequiredTask = HLTSimTaskMuMu2022postEE
+    RequiredTask = HLTSimTaskMuMu2022postEEWOInitialRecoCorrection
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2022postEE/MuMu/recosim/{self.branch}_recosim.root")
+        return law.wlcg.WLCGFileTarget(f"2022postEE/MuMu_wo_InitialRecoCorrection/recosim/{self.branch}_recosim.root")
 
     def run(self):
         """Run the reco cmsdriver command"""
@@ -141,7 +176,7 @@ class RecoSimTaskMuMu2022postEE(EmbeddingTask):
         )
 
 
-class MergingTaskMuMu2022postEE(EmbeddingTask):
+class MergingTaskMuMu2022postEEWOInitialRecoCorrection(EmbeddingTask):
     
     cmssw_scram_arch = luigi.Parameter(
         default="el8_amd64_gcc11",
@@ -153,11 +188,11 @@ class MergingTaskMuMu2022postEE(EmbeddingTask):
     )
     """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
 
-    RequiredTask = RecoSimTaskMuMu2022postEE
+    RequiredTask = RecoSimTaskMuMu2022postEEWOInitialRecoCorrection
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2022postEE/MuMu/merging/{self.branch}_merging.root")
+        return law.wlcg.WLCGFileTarget(f"2022postEE/MuMu_wo_InitialRecoCorrection/merging/{self.branch}_merging.root")
 
     def run(self):
         """Run the merging cmsdriver command"""
@@ -174,7 +209,7 @@ class MergingTaskMuMu2022postEE(EmbeddingTask):
             number=self.emb_number_of_events,
         )
 
-class NanoAODTaskMuMu2022postEE(EmbeddingTask):
+class NanoAODTaskMuMu2022postEEWOInitialRecoCorrection(EmbeddingTask):
     
     emb_files_per_job = luigi.IntParameter(
         default=20,
@@ -191,11 +226,11 @@ class NanoAODTaskMuMu2022postEE(EmbeddingTask):
     )
     """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
 
-    RequiredTask = MergingTaskMuMu2022postEE
+    RequiredTask = MergingTaskMuMu2022postEEWOInitialRecoCorrection
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2022postEE/MuMu/nanoaod/{self.branch}_nanoaod.root")
+        return law.wlcg.WLCGFileTarget(f"2022postEE/MuMu_wo_InitialRecoCorrection/nanoaod/{self.branch}_nanoaod.root")
 
     def run(self):
         """Run the merging cmsdriver command"""

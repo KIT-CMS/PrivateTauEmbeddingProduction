@@ -85,6 +85,17 @@ class ETP_HTCondorWorkflow(law.htcondor.HTCondorWorkflow):
         """location of submission output files, such as the json files containing job data"""
         job_dir = law.config.get_expanded("job", "job_file_dir")
         return law.LocalDirectoryTarget(f"{job_dir}/{self.task_id}/")
+    
+    def htcondor_create_job_file_factory(self):
+        path = self.htcondor_log_directory().abspath
+        factory = super().htcondor_create_job_file_factory(dir=path, mkdtemp=False)
+        logger.warn(f"HTCondor job directory is: {path}")
+        return factory
+    
+    def htcondor_log_directory(self):
+        """Creates a log directory in the output directory, else the logs would be in some tmp directory with a random name"""
+        log_path = os.path.join(self.htcondor_output_directory().abspath, "logs")
+        return law.LocalDirectoryTarget(log_path)
 
     def htcondor_bootstrap_file(self):
         """Path to the bootstrap file thats used to setup the environment in the docker containers."""
@@ -101,11 +112,10 @@ class ETP_HTCondorWorkflow(law.htcondor.HTCondorWorkflow):
 
     def htcondor_job_config(self, config, job_num, branches):
         """"""
-
-        config.log = os.path.join("Log.txt")
-        config.stdout = os.path.join("Output.txt")
-        config.stderr = os.path.join("Error.txt")
-
+        # Names of the log, stdout and stderr files
+        config.log = os.path.join(self.htcondor_log_directory().abspath, "Log.txt")
+        config.stdout = os.path.join(self.htcondor_log_directory().abspath, "Output.txt")
+        config.stderr = os.path.join(self.htcondor_log_directory().abspath, "Error.txt")
         config.universe = "container"
         
         config.custom_content = [
