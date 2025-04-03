@@ -168,3 +168,5 @@ luigi/*/__pycache__/
 */__pycache__/
 jobs*
 .vscode
+
+pickevents_from_data/

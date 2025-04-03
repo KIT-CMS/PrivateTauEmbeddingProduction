@@ -20,7 +20,7 @@ class BundleRepo(law.git.BundleGitRepository, law.tasks.TransferLocalFile):
     )
     """ number of replicas to generate for the bundle to allow concurrent access """
     
-    exclude_files = ["tmp", "*~", "*.pyc", ".vscode/"]
+    exclude_files = ["tmp", "*~", "*.pyc", ".vscode/", "generate_filelists_pick_events/"]
     """ list of files to exclude from the bundle, additional to the ones in the .gitignore file """
     
     # Don't know what this is for
