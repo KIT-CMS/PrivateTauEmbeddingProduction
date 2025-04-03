@@ -26,6 +26,11 @@ class BundleCMSSWTask(
     cmssw_version = luigi.Parameter(
         description="CMSSW version to bundle.",
     )
+
+    cmssw_branch = luigi.Parameter(
+        description="The CMSSW git branch to use with the chosen cmssw version",
+    )
+
     cmssw_scram_arch = luigi.Parameter(
         description="CMSSW scram architecture.",
     )
@@ -142,6 +147,7 @@ class BundleCMSSWTask(
     def htcondor_job_config(self, config, job_num, branches):
         config = super().htcondor_job_config(config, job_num, branches)
         config.render_variables["cmssw_version"] = self.cmssw_version
+        config.render_variables["cmssw_branch"] = self.cmssw_branch
         config.render_variables["cmssw_scram_arch"] = self.cmssw_scram_arch
         config.render_variables["n_compile_cores"] = self.htcondor_request_cpus
         return config
@@ -152,10 +158,15 @@ class ETP_CMSSW_HTCondorWorkflow(ETP_HTCondorWorkflow):
     # we need to set the checksum manually as the CMSSW repo is not there yet when the checksum is calculated.
     # Disableing the checksumming leads to other problems, as the checksum is used to create the bundle file name.
     git_cmssw_hash = luigi.Parameter(
+        default="",
         description="git hash of the cmssw repository. This is only used to set a unique name for the bundle file.",
     )
     cmssw_version = luigi.Parameter(
         description="CMSSW version to bundle.",
+    )
+
+    cmssw_branch = luigi.Parameter(
+        description="The CMSSW git branch to use with the chosen cmssw version",
     )
     
     cmssw_scram_arch = luigi.Parameter(
@@ -182,11 +193,15 @@ class ETP_CMSSW_HTCondorWorkflow(ETP_HTCondorWorkflow):
     def htcondor_workflow_requires(self):
         """Adds the repo and software bundling as requirements"""
         reqs = super().htcondor_workflow_requires()
-
+        
+        custom_tag=self.cmssw_branch
+        if self.git_cmssw_hash:
+            custom_tag += f".{self.git_cmssw_hash}"
+            
         # add repo and software bundling as requirements when getenv is not requested
         reqs["cmssw"] = BundleCMSSWTask.req(
             self,
-            custom_checksum=self.git_cmssw_hash,
+            custom_checksum=custom_tag,
         )
         return reqs
 

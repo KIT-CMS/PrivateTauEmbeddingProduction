@@ -30,6 +30,12 @@ class SelectionTask2022postEE(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
         description="The CMSSW version to use for the cmsdriver command.",
     )
     """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
+    
+    cmssw_branch = luigi.Parameter(
+        default="embedding_backport_CMSSW_13_0_X",
+        description="The CMSSW git branch to use with the chosen cmssw version",
+    )
+    
     cmssw_scram_arch = luigi.Parameter(
         default="el8_amd64_gcc11",
         description="The CMSSW scram arch.",
@@ -78,6 +84,11 @@ class CleaningTaskMuMu2022postEE(EmbeddingTask):
     )
     """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
     
+    cmssw_branch = luigi.Parameter(
+        default="embedding_backport_CMSSW_13_0_X",
+        description="The CMSSW git branch to use with the chosen cmssw version",
+    )
+    
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
         return law.wlcg.WLCGFileTarget(f"2022postEE/MuMu/cleaning/{self.branch}_cleaning.root")
@@ -115,6 +126,11 @@ class CleaningTaskTauTau2022postEE(EmbeddingTask):
         description="The CMSSW version to use for the cmsdriver command.",
     )
     """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
+    
+    cmssw_branch = luigi.Parameter(
+        default="embedding_backport_CMSSW_13_0_X",
+        description="The CMSSW git branch to use with the chosen cmssw version",
+    )
     
     def output(self):
         """The path to the files the cmsdriver command is going to create"""

@@ -6,12 +6,7 @@ export USER="{{user}}"
 # set the base directory where the repo and cmssw are stored
 export BASE_DIR="${PWD}/repo"
 # set CMSSW branch
-if [[ "{{cmssw_version}}" == CMSSW_13_0_* ]]; then
-    export cmssw_branch="embedding_backport_CMSSW_13_0_X"
-elif [[ "{{cmssw_version}}" == CMSSW_12_4_* ]]; then
-    export cmssw_branch="embedding_backport_CMSSW_12_4_X"
-fi
-# export cmssw_branch="embedding_update_for_run3_{{cmssw_version}}"
+export cmssw_branch="{{cmssw_branch}}"
 
 # source the law wlcg tools, mainly for law_wlcg_get_file
 source "{{wlcg_tools}}" "" || return "$?"

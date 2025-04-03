@@ -27,6 +27,11 @@ class GenSimTaskMuMu2022postEE(EmbeddingTask):
     )
     """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
 
+    cmssw_branch = luigi.Parameter(
+        default="embedding_backport_CMSSW_13_0_X",
+        description="The CMSSW git branch to use with the chosen cmssw version",
+    )
+    
     RequiredTask = CleaningTaskMuMu2022postEE
 
     def output(self):
@@ -69,6 +74,12 @@ class HLTSimTaskMuMu2022postEE(EmbeddingTask):
     Taken from https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_setup/EGM-Run3Summer22EEDRPremix-00004 
     from this chain https://cms-pdmv-prod.web.cern.ch/mcm/chained_requests?prepid=EGM-chain_Run3Summer22EEwmLHEGS_flowRun3Summer22EEDRPremix_flowRun3Summer22EEMiniAODv4_flowRun3Summer22EENanoAODv12-00001&page=0&shown=15
     """
+    
+    cmssw_branch = luigi.Parameter(
+        default="embedding_backport_CMSSW_12_4_X",
+        description="The CMSSW git branch to use with the chosen cmssw version",
+    )
+    
     cmssw_scram_arch = luigi.Parameter(
         default="el8_amd64_gcc10",
         description="The CMSSW scram arch.",
@@ -110,6 +121,12 @@ class RecoSimTaskMuMu2022postEE(EmbeddingTask):
     Taken from https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_setup/EGM-Run3Summer22EEDRPremix-00004 
     from this chain https://cms-pdmv-prod.web.cern.ch/mcm/chained_requests?prepid=EGM-chain_Run3Summer22EEwmLHEGS_flowRun3Summer22EEDRPremix_flowRun3Summer22EEMiniAODv4_flowRun3Summer22EENanoAODv12-00001&page=0&shown=15
     """
+    
+    cmssw_branch = luigi.Parameter(
+        default="embedding_backport_CMSSW_12_4_X",
+        description="The CMSSW git branch to use with the chosen cmssw version",
+    )
+    
     cmssw_scram_arch = luigi.Parameter(
         default="el8_amd64_gcc10",
         description="The CMSSW scram arch.",
@@ -153,6 +170,11 @@ class MergingTaskMuMu2022postEE(EmbeddingTask):
     )
     """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
 
+    cmssw_branch = luigi.Parameter(
+        default="embedding_backport_CMSSW_13_0_X",
+        description="The CMSSW git branch to use with the chosen cmssw version",
+    )
+    
     RequiredTask = RecoSimTaskMuMu2022postEE
 
     def output(self):
@@ -191,6 +213,11 @@ class NanoAODTaskMuMu2022postEE(EmbeddingTask):
     )
     """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
 
+    cmssw_branch = luigi.Parameter(
+        default="embedding_backport_CMSSW_13_0_X",
+        description="The CMSSW git branch to use with the chosen cmssw version",
+    )
+    
     RequiredTask = MergingTaskMuMu2022postEE
 
     def output(self):

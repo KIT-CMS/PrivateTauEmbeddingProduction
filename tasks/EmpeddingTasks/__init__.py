@@ -20,7 +20,11 @@ class EmbeddingTask(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
     # cmssw_version = luigi.Parameter(
     #     description="The CMSSW version to use for the cmsdriver command.",
     # )
-    
+     
+    # cmssw_branch = luigi.Parameter(
+    #     description="The CMSSW git branch to use with the chosen cmssw version",
+    # )
+
     # cmssw_scram_arch = luigi.Parameter(
     #     description="The CMSSW scram arch.",
     # )
