@@ -12,7 +12,7 @@ logger = law.logger.get_logger(__name__)
 
 
 
-class SelectionTask2022postEE(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
+class SelectionTask2024MC(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
     """This class is the first step in the embedding workflow. Therfore can't inherit from EmbeddingTask"""
 
     emb_number_of_events = luigi.Parameter(
@@ -21,23 +21,23 @@ class SelectionTask2022postEE(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
     )
 
     emb_filelist = luigi.Parameter(
-        default= "Muon_Run2022G-v1_RAW_test.filelist",
+        default= "artur_2024_mc_prod.filelist",
         description="List of input files.",
     )
 
     cmssw_version = luigi.Parameter(
-        default="CMSSW_13_0_23",
+        default="CMSSW_15_1_0_pre1",
         description="The CMSSW version to use for the cmsdriver command.",
     )
     """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
     
     cmssw_branch = luigi.Parameter(
-        default="embedding_backport_CMSSW_13_0_X_wo_InitialRecoCorrection",
+        default="embedding_dev_CMSSW_15_1_0_pre1",
         description="The CMSSW git branch to use with the chosen cmssw version",
     )
     
     cmssw_scram_arch = luigi.Parameter(
-        default="el8_amd64_gcc11",
+        default="el8_amd64_gcc12",
         description="The CMSSW scram arch.",
     )
     def create_branch_map(self):
@@ -50,7 +50,7 @@ class SelectionTask2022postEE(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
         return law.wlcg.WLCGFileTarget(
-            f"2022postEE/selection/{self.branch}_selection.root"
+            f"2024_mc/selection/{self.branch}_selection.root"
         )
 
     def run(self):
@@ -58,11 +58,11 @@ class SelectionTask2022postEE(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
         logger.warning(self.branch_data)
         self.run_cms_driver(
             "RECO",
-            data=True,
+            mc=True,
             step="RAW2DIGI,L1Reco,RECO,PAT",
-            scenario="pp",
-            conditions="auto:run3_data",
-            era="Run3",
+            geometry="DB:Extended",
+            conditions="auto:phase1_2024_realistic",
+            era="Run3_2024",
             eventcontent="RAWRECO",
             datatier="RAWRECO",
             customise="TauAnalysis/MCEmbeddingTools/customisers.customiseSelecting",
@@ -70,38 +70,38 @@ class SelectionTask2022postEE(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
             number=self.emb_number_of_events,
         )
 
-class CleaningTaskMuMu2022postEE(EmbeddingTask):
+class CleaningTaskMuMu2024MC(EmbeddingTask):
 
-    RequiredTask = SelectionTask2022postEE
+    RequiredTask = SelectionTask2024MC
     
     cmssw_scram_arch = luigi.Parameter(
-        default="el8_amd64_gcc11",
+        default="el8_amd64_gcc12",
         description="The CMSSW scram arch.",
     )
     cmssw_version = luigi.Parameter(
-        default="CMSSW_13_0_23",
+        default="CMSSW_15_1_0_pre1",
         description="The CMSSW version to use for the cmsdriver command.",
     )
     """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
     
     cmssw_branch = luigi.Parameter(
-        default="embedding_backport_CMSSW_13_0_X_wo_InitialRecoCorrection",
+        default="embedding_dev_CMSSW_15_1_0_pre1",
         description="The CMSSW git branch to use with the chosen cmssw version",
     )
     
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2022postEE/MuMu/cleaning/{self.branch}_cleaning.root")
+        return law.wlcg.WLCGFileTarget(f"2024_mc/MuMu/cleaning/{self.branch}_cleaning.root")
 
     def run(self):
         """Run the cleaning cmsdriver command"""
         self.run_cms_driver(
             "LHEprodandCLEAN",
-            data=True,
+            mc=True,
             step="RAW2DIGI,RECO,PAT",
-            scenario="pp",
-            conditions="auto:run3_data",
-            era="Run3",
+            geometry="DB:Extended",
+            conditions="auto:phase1_2024_realistic",
+            era="Run3_2024",
             eventcontent="RAWRECO",
             datatier="RAWRECO",
             customise="TauAnalysis/MCEmbeddingTools/customisers.customiseLHEandCleaning",
@@ -113,38 +113,38 @@ class CleaningTaskMuMu2022postEE(EmbeddingTask):
         )
 
 
-class CleaningTaskTauTau2022postEE(EmbeddingTask):
+class CleaningTaskTauTau2024MC(EmbeddingTask):
 
-    RequiredTask = SelectionTask2022postEE
+    RequiredTask = SelectionTask2024MC
     
     cmssw_scram_arch = luigi.Parameter(
-        default="el8_amd64_gcc11",
+        default="el8_amd64_gcc12",
         description="The CMSSW scram arch.",
     )
     cmssw_version = luigi.Parameter(
-        default="CMSSW_13_0_23",
+        default="CMSSW_15_1_0_pre1",
         description="The CMSSW version to use for the cmsdriver command.",
     )
     """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
     
     cmssw_branch = luigi.Parameter(
-        default="embedding_backport_CMSSW_13_0_X_wo_InitialRecoCorrection",
+        default="embedding_dev_CMSSW_15_1_0_pre1",
         description="The CMSSW git branch to use with the chosen cmssw version",
     )
     
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2022postEE/cleaning/{self.branch}_cleaning.root")
+        return law.wlcg.WLCGFileTarget(f"2024_mc/cleaning/{self.branch}_cleaning.root")
 
     def run(self):
         """Run the cleaning cmsdriver command"""
         self.run_cms_driver(
             "LHEprodandCLEAN",
-            data=True,
+            mc=True,
             step="RAW2DIGI,RECO,PAT",
-            scenario="pp",
-            conditions="auto:run3_data",
-            era="Run3",
+            geometry="DB:Extended",
+            conditions="auto:phase1_2024_realistic",
+            era="Run3_2024",
             eventcontent="RAWRECO",
             datatier="RAWRECO",
             customise="TauAnalysis/MCEmbeddingTools/customisers.customiseLHEandCleaning",

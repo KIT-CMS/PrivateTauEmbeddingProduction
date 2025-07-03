@@ -258,10 +258,10 @@ class ETP_CMSSW_HTCondorWorkflow(ETP_HTCondorWorkflow):
             raise Exception(f"executing the cmsdriver command failed: {cmd}")
         return code, out, err
 
-    def run_cms_driver(self, process_name, **kwargs):
+    def run_cms_driver(self, process_name="", **kwargs):
         """Run a cmsDriver.py command in the CMSSW environment and copy the output file to the remote location specified in output().
 
-        :param process_name: Name of the process to run or the python configuration file to run.
+        :param process_name: Name of the python configuration fragment file to use for the GEN step (default: "").
         :type process_name: str
         :param kwargs: Arguments to pass to the cmsDriver.py command. Either the data or mc argument must be set to True.
             - If the data argument is set to True, the allowed arguments are:
@@ -296,6 +296,7 @@ class ETP_CMSSW_HTCondorWorkflow(ETP_HTCondorWorkflow):
         # define allowed arguments for the data and mc cmsDriver.py commands
         allowed_data_args = [
             "step",
+            "processName",
             "data",
             "scenario",
             "conditions",
@@ -304,12 +305,15 @@ class ETP_CMSSW_HTCondorWorkflow(ETP_HTCondorWorkflow):
             "datatier",
             "customise",
             "customise_commands",
+            "inputCommands",
+            "procModifiers",
             "filein",
             "fileout",
             "number",
         ]
         allowed_mc_args = [
             "step",
+            "processName",
             "mc",
             "beamspot",
             "geometry",
@@ -319,6 +323,8 @@ class ETP_CMSSW_HTCondorWorkflow(ETP_HTCondorWorkflow):
             "datatier",
             "customise",
             "customise_commands",
+            "inputCommands",
+            "procModifiers",
             "filein",
             "fileout",
             "number",

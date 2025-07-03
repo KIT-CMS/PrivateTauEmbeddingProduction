@@ -42,8 +42,8 @@ source "{{wlcg_tools}}" "" || return "$?"
     git cms-init --upstream-only # --upstream-only is used to avoid checking for a personal cmmsw fork and the personal git name/email etc are not needed
 
     # CMSSW folders which contain special code changes in the embedding $cmssw_branch
-    git sparse-checkout set TauAnalysis/MCEmbeddingTools DataFormats/GsfTrackReco RecoEgamma/EgammaPhotonAlgos RecoEgamma/EgammaElectronProducers || return $?
-
+    #git sparse-checkout set TauAnalysis/MCEmbeddingTools DataFormats/GsfTrackReco RecoEgamma/EgammaPhotonAlgos RecoEgamma/EgammaElectronProducers Configuration/ProcessModifiers Configuration/EventContent Configuration/Applications || return $?
+    git cms-addpkg TauAnalysis/MCEmbeddingTools Configuration/ProcessModifiers Configuration/EventContent Configuration/Applications
 
     echo "################ Get dev changes form KIT-CMS ################"
     git remote add kit-cms https://github.com/KIT-CMS/cmssw.git || return $?

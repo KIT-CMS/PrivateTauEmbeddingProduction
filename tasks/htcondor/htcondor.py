@@ -66,7 +66,7 @@ class ETP_HTCondorWorkflow(law.htcondor.HTCondorWorkflow):
     )
     # These htcondor parameters are not expected to be changed (default for ETP HTCondor)
     htcondor_requirements = luigi.Parameter(
-        default="(TARGET.ProvidesCPU)&&(TARGET.ProvidesIO)",
+        default='(TARGET.ProvidesCPU)&&(TARGET.ProvidesIO)',
         significant=False, # makes it not show up in the task representation
         description="Additional requirements on e.g. the target machines to run the jobs.",
     )

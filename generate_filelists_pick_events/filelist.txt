@@ -1,0 +1,1 @@
+root://cmsdcache-kit-disk.gridka.de:1094//store/user/cwinter/run3_embedding/2022postEE/MuMu/nanoaod/0_nanoaod.root=24950
