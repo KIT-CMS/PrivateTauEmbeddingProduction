@@ -43,7 +43,7 @@ source "{{wlcg_tools}}" "" || return "$?"
 
     # CMSSW folders which contain special code changes in the embedding $cmssw_branch
     #git sparse-checkout set TauAnalysis/MCEmbeddingTools DataFormats/GsfTrackReco RecoEgamma/EgammaPhotonAlgos RecoEgamma/EgammaElectronProducers Configuration/ProcessModifiers Configuration/EventContent Configuration/Applications || return $?
-    git cms-addpkg TauAnalysis/MCEmbeddingTools Configuration/ProcessModifiers Configuration/EventContent Configuration/Applications
+    git cms-addpkg Configuration/Applications Configuration/EventContent Configuration/Eras Configuration/ProcessModifiers Configuration/PyReleaseValidation Configuration/StandardSequences IOMC/EventVertexGenerators PhysicsTools/NanoAOD RecoLocalCalo/Configuration RecoLocalCalo/EcalRecProducers RecoLocalCalo/HcalRecProducers RecoLocalMuon/CSCRecHitD RecoLocalMuon/CSCSegment RecoLocalMuon/DTRecHit RecoLocalMuon/DTSegment RecoLocalMuon/RPCRecHit RecoLocalTracker/SiStripClusterizer RecoLuminosity/LumiProducer RecoTracker/IterativeTracking RecoVertex/Configuration SimGeneral/MixingModule TauAnalysis/MCEmbeddingTools
 
     echo "################ Get dev changes form KIT-CMS ################"
     git remote add kit-cms https://github.com/KIT-CMS/cmssw.git || return $?

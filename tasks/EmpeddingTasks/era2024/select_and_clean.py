@@ -26,13 +26,13 @@ class SelectionTask2024(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
     )
 
     cmssw_version = luigi.Parameter(
-        default="CMSSW_15_0_4_patch3",
+        default="CMSSW_14_2_2",
         description="The CMSSW version to use for the cmsdriver command.",
     )
     """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
     
     cmssw_branch = luigi.Parameter(
-        default="embedding_dev_CMSSW_15_0_4_p3_improveCode",
+        default="embedding_dev_CMSSW_14_2_X",
         description="The CMSSW git branch to use with the chosen cmssw version",
     )
     
@@ -78,13 +78,13 @@ class CleaningTaskTauTau2024(EmbeddingTask):
         description="The CMSSW scram arch.",
     )
     cmssw_version = luigi.Parameter(
-        default="CMSSW_15_0_4_patch3",
+        default="CMSSW_14_2_2",
         description="The CMSSW version to use for the cmsdriver command.",
     )
     """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
     
     cmssw_branch = luigi.Parameter(
-        default="embedding_dev_CMSSW_15_0_4_p3_improveCode",
+        default="embedding_dev_CMSSW_14_2_X",
         description="The CMSSW git branch to use with the chosen cmssw version",
     )
     
@@ -95,7 +95,7 @@ class CleaningTaskTauTau2024(EmbeddingTask):
     def run(self):
         """Run the cleaning cmsdriver command"""
         self.run_cms_driver(
-            step="USER:TauAnalysis/MCEmbeddingTools/LHE_USER_cff.embeddingLHEProducerTask,RAW2DIGI,RECO:TauAnalysis/MCEmbeddingTools/Cleaning_RECO_cff.reconstruction",
+            step="USER:TauAnalysis/MCEmbeddingTools/LHE_USER_cff.embeddingLHEProducerTask,RAW2DIGI,RECO",
             processName="LHEembeddingCLEAN",
             data=True,
             scenario="pp",
@@ -103,6 +103,7 @@ class CleaningTaskTauTau2024(EmbeddingTask):
             era="Run3_2024",
             eventcontent="TauEmbeddingCleaning",
             datatier="RAWRECO",
+            procModifiers="tau_embedding_cleaning",
             filein=",".join(self.get_input_files()),
             number=self.emb_number_of_events,
         )

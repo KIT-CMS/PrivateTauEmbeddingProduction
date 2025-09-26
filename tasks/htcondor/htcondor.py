@@ -72,7 +72,7 @@ class ETP_HTCondorWorkflow(law.htcondor.HTCondorWorkflow):
     )
     htcondor_remote_job = luigi.Parameter(
         default="True",
-        significant=False, # makes it not show up in the task representation
+        # significant=False, # makes it not show up in the task representation
         description="ETP HTCondor specific flag to allow jobs to run on remote resources (NEMO, TOPAS).",
     )
     
