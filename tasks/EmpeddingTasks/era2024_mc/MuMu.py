@@ -8,52 +8,12 @@ from tasks.EmpeddingTasks.era2024_mc.select_and_clean import (
 
 logger = law.logger.get_logger(__name__)
 
-class CleaningTaskMuMu2024MCWOInitialRecoCorrection(EmbeddingTask):
+class CleaningTaskMuMu2024MC(EmbeddingTask):
 
     RequiredTask = SelectionTask2024MC
     
-    cmssw_scram_arch = luigi.Parameter(
-        default="el8_amd64_gcc12",
-        description="The CMSSW scram arch.",
-    )
-    cmssw_version = luigi.Parameter(
-        default="CMSSW_15_1_0_pre1",
-        description="The CMSSW version to use for the cmsdriver command.",
-    )
-    """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
-    
-    cmssw_branch = luigi.Parameter(
-        default="embedding_dev_CMSSW_15_1_0_pre1",
-        description="The CMSSW git branch to use with the chosen cmssw version",
-    )
-    
-    def output(self):
-        """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2024_mc/MuMu_wo_InitialRecoCorrection/cleaning/{self.branch}_cleaning.root")
-
-    def run(self):
-        """Run the cleaning cmsdriver command"""
-        self.run_cms_driver(
-            "LHEprodandCLEAN",
-            mc=True,
-            step="RAW2DIGI,RECO,PAT",
-            geometry="DB:Extended",
-            conditions="auto:phase1_2024_realistic",
-            era="Run3_2024",
-            eventcontent="RAWRECO",
-            datatier="RAWRECO",
-            customise="TauAnalysis/MCEmbeddingTools/customisers.customiseLHEandCleaning",
-            customise_commands=(  # configs for Mu->Mu embedding
-                "'process.externalLHEProducer.particleToEmbed = cms.int32(13)'"
-            ),
-            filein=",".join(self.get_input_files()),
-            number=self.emb_number_of_events,
-        )
-
-class GenSimTaskMuMu2024MCWOInitialRecoCorrection(EmbeddingTask):
-    
     emb_files_per_job = luigi.IntParameter(
-        default=1,
+        default=2,
         description="Number of files to process per job.",
     )
     
@@ -62,51 +22,86 @@ class GenSimTaskMuMu2024MCWOInitialRecoCorrection(EmbeddingTask):
         description="The CMSSW scram arch.",
     )
     cmssw_version = luigi.Parameter(
-        default="CMSSW_15_1_0_pre1",
+        default="CMSSW_14_2_2",
+        description="The CMSSW version to use for the cmsdriver command.",
+    )
+    """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
+    
+    cmssw_branch = luigi.Parameter(
+        default="embedding_dev_CMSSW_14_2_X",
+        description="The CMSSW git branch to use with the chosen cmssw version",
+    )
+    
+    def output(self):
+        """The path to the files the cmsdriver command is going to create"""
+        return law.wlcg.WLCGFileTarget(f"2024_mc/MuMu/cleaning/{self.branch}_cleaning.root")
+
+    def run(self):
+        """Run the cleaning cmsdriver command"""
+        self.run_cms_driver(
+            step="USER:TauAnalysis/MCEmbeddingTools/LHE_USER_cff.embeddingLHEProducerTask,RAW2DIGI,RECO",
+            processName="LHEembeddingCLEAN",
+            mc=True,
+            geometry="DB:Extended",
+            conditions="auto:phase1_2024_realistic",
+            era="Run3_2024",
+            eventcontent="TauEmbeddingCleaning",
+            datatier="RAWRECO",
+            procModifiers="tau_embedding_cleaning,tau_embedding_mu_to_mu",
+            filein=",".join(self.get_input_files()),
+            number=self.emb_number_of_events,
+        )
+
+class GenSimTaskMuMu2024MC(EmbeddingTask):
+    
+    cmssw_scram_arch = luigi.Parameter(
+        default="el8_amd64_gcc12",
+        description="The CMSSW scram arch.",
+    )
+    cmssw_version = luigi.Parameter(
+        default="CMSSW_14_2_2",
         description="The CMSSW version to use for the cmsdriver command.",
     )
     """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
 
     cmssw_branch = luigi.Parameter(
-        default="embedding_dev_CMSSW_15_1_0_pre1",
+        default="embedding_dev_CMSSW_14_2_X",
         description="The CMSSW git branch to use with the chosen cmssw version",
     )
     
-    RequiredTask = CleaningTaskMuMu2024MCWOInitialRecoCorrection
+    RequiredTask = CleaningTaskMuMu2024MC
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2024_mc/MuMu_wo_InitialRecoCorrection/gensim/{self.branch}_gensim.root")
+        return law.wlcg.WLCGFileTarget(f"2024_mc/MuMu/gensim/{self.branch}_gensim.root")
 
     def run(self):
         """Run the gen cmsdriver command"""
         self.run_cms_driver(
-            "TauAnalysis/MCEmbeddingTools/python/EmbeddingPythia8Hadronizer_cfi.py",
+            "TauAnalysis/MCEmbeddingTools/python/Simulation_GEN_cfi.py",
             step="GEN,SIM,DIGI,L1,DIGI2RAW",
             mc=True,
             beamspot="DBrealistic",
             geometry="DB:Extended",
             era="Run3_2024",
             conditions="auto:phase1_2024_realistic", # same Global Tag as in HLTSimTask!
-            eventcontent="RAWSIM",
+            eventcontent="TauEmbeddingSimGen",
             datatier="RAWSIM",
-            customise="TauAnalysis/MCEmbeddingTools/customisers.customiseGenerator_preHLT",
-            customise_commands=(  # configs for Mu->Mu embedding
-                "'"
-                """process.generator.HepMCFilter.filterParameters.MuMuCut = cms.string("(Mu1.Pt > 17 && Mu2.Pt > 8 && Mu1.Eta < 2.5 && Mu2.Eta < 2.5)");"""
-                """process.generator.HepMCFilter.filterParameters.Final_States = cms.vstring("MuMu");"""
-                """process.generator.nAttempts = cms.uint32(1);"""
-                "'"
-            ),
+            procModifiers="tau_embedding_sim,tau_embedding_mu_to_mu",
             filein=",".join(self.get_input_files()),
             number=self.emb_number_of_events,
         )
 
 
-class HLTSimTaskMuMu2024MCWOInitialRecoCorrection(EmbeddingTask):
+class HLTSimTaskMuMu2024MC(EmbeddingTask):
 
+    emb_files_per_job = luigi.IntParameter(
+        default=2,
+        description="Number of files to process per job.",
+    )
+    
     cmssw_version = luigi.Parameter(
-        default="CMSSW_15_1_0_pre1",
+        default="CMSSW_14_2_2",
         description="The CMSSW version to use for the cmsdriver command.",
     )
     """
@@ -116,7 +111,7 @@ class HLTSimTaskMuMu2024MCWOInitialRecoCorrection(EmbeddingTask):
     """
     
     cmssw_branch = luigi.Parameter(
-        default="embedding_dev_CMSSW_15_1_0_pre1",
+        default="embedding_dev_CMSSW_14_2_X",
         description="The CMSSW git branch to use with the chosen cmssw version",
     )
     
@@ -124,35 +119,34 @@ class HLTSimTaskMuMu2024MCWOInitialRecoCorrection(EmbeddingTask):
         default="el8_amd64_gcc12",
         description="The CMSSW scram arch.",
     )
-    RequiredTask = GenSimTaskMuMu2024MCWOInitialRecoCorrection
+    RequiredTask = GenSimTaskMuMu2024MC
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2024_mc/MuMu_wo_InitialRecoCorrection/hltsim/{self.branch}_hltsim.root")
+        return law.wlcg.WLCGFileTarget(f"2024_mc/MuMu/hltsim/{self.branch}_hltsim.root")
 
     def run(self):
         """Run the hlt cmsdriver command"""
         # step and conditions taken from https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_setup/EGM-Run3Summer22EEDRPremix-00004 (see recomended sample: https://twiki.cern.ch/twiki/bin/viewauth/CMS/MuonRun32022#MC)
         self.run_cms_driver(
-            "TauAnalysis/MCEmbeddingTools/python/EmbeddingPythia8Hadronizer_cfi.py",
-            step="HLT:2024v14",
+            step="HLT:2024v14+TauAnalysis/MCEmbeddingTools/Simulation_HLT_customiser_cff.embeddingHLTCustomiser",
+            processName="SIMembeddingHLT",
             mc=True,
             beamspot="DBrealistic",
             geometry="DB:Extended",
             era="Run3_2024",
             conditions="auto:phase1_2024_realistic",
-            eventcontent="RAWSIM",
+            eventcontent="TauEmbeddingSimHLT",
             datatier="RAWSIM",
-            customise="TauAnalysis/MCEmbeddingTools/customisers.customiseGenerator_HLT",
             filein=",".join(self.get_input_files()),
             number=self.emb_number_of_events,
         )
 
 
-class RecoSimTaskMuMu2024MCWOInitialRecoCorrection(EmbeddingTask):
+class RecoSimTaskMuMu2024MC(EmbeddingTask):
     
     cmssw_version = luigi.Parameter(
-        default="CMSSW_15_1_0_pre1",
+        default="CMSSW_14_2_2",
         description="The CMSSW version to use for the cmsdriver command.",
     )
     """
@@ -162,7 +156,7 @@ class RecoSimTaskMuMu2024MCWOInitialRecoCorrection(EmbeddingTask):
     """
     
     cmssw_branch = luigi.Parameter(
-        default="embedding_dev_CMSSW_15_1_0_pre1",
+        default="embedding_dev_CMSSW_14_2_X",
         description="The CMSSW git branch to use with the chosen cmssw version",
     )
     
@@ -172,72 +166,73 @@ class RecoSimTaskMuMu2024MCWOInitialRecoCorrection(EmbeddingTask):
     )
     """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
 
-    RequiredTask = HLTSimTaskMuMu2024MCWOInitialRecoCorrection
+    RequiredTask = HLTSimTaskMuMu2024MC
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2024_mc/MuMu_wo_InitialRecoCorrection/recosim/{self.branch}_recosim.root")
+        return law.wlcg.WLCGFileTarget(f"2024_mc/MuMu/recosim/{self.branch}_recosim.root")
 
     def run(self):
         """Run the reco cmsdriver command"""
         self.run_cms_driver(
-            "TauAnalysis/MCEmbeddingTools/python/EmbeddingPythia8Hadronizer_cfi.py",
             step="RAW2DIGI,L1Reco,RECO,RECOSIM",
+            processName="SIMembedding",
             mc=True,
             beamspot="DBrealistic",
             geometry="DB:Extended",
             era="Run3_2024",
             conditions="auto:phase1_2024_realistic",
-            eventcontent="RAWRECOSIMHLT",
+            eventcontent="TauEmbeddingSimReco",
             datatier="RAW-RECO-SIM",
-            customise="TauAnalysis/MCEmbeddingTools/customisers.customiseGenerator_postHLT",
+            procModifiers="tau_embedding_sim",
             filein=",".join(self.get_input_files()),
             number=self.emb_number_of_events,
         )
 
 
-class MergingTaskMuMu2024MCWOInitialRecoCorrection(EmbeddingTask):
+class MergingTaskMuMu2024MC(EmbeddingTask):
     
     cmssw_scram_arch = luigi.Parameter(
         default="el8_amd64_gcc12",
         description="The CMSSW scram arch.",
     )
     cmssw_version = luigi.Parameter(
-        default="CMSSW_15_1_0_pre1",
+        default="CMSSW_14_2_2",
         description="The CMSSW version to use for the cmsdriver command.",
     )
     """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
 
     cmssw_branch = luigi.Parameter(
-        default="embedding_dev_CMSSW_15_1_0_pre1",
+        default="embedding_dev_CMSSW_14_2_X",
         description="The CMSSW git branch to use with the chosen cmssw version",
     )
     
-    RequiredTask = RecoSimTaskMuMu2024MCWOInitialRecoCorrection
+    RequiredTask = RecoSimTaskMuMu2024MC
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2024_mc/MuMu_wo_InitialRecoCorrection/merging/{self.branch}_merging.root")
+        return law.wlcg.WLCGFileTarget(f"2024_mc/MuMu/merging/{self.branch}_merging.root")
 
     def run(self):
         """Run the merging cmsdriver command"""
         self.run_cms_driver(
-            "PAT",
-            step="PAT",
+            step="USER:TauAnalysis/MCEmbeddingTools/Merging_USER_cff.merge_step,PAT",
+            processName="MERGE",
             mc=True,
             conditions="auto:phase1_2024_realistic",
             era="Run3_2024",
-            eventcontent="MINIAODSIM",
+            eventcontent="TauEmbeddingMergeMINIAOD",
             datatier="USER",
-            customise="TauAnalysis/MCEmbeddingTools/customisers.customiseMerging",
+            procModifiers="tau_embedding_merging",
+            inputCommands="'keep *_*_*_*'",
             filein=",".join(self.get_input_files()),
             number=self.emb_number_of_events,
         )
 
-class NanoAODTaskMuMu2024MCWOInitialRecoCorrection(EmbeddingTask):
+class NanoAODTaskMuMu2024MC(EmbeddingTask):
     
     emb_files_per_job = luigi.IntParameter(
-        default=1,
+        default=20,
         description="Number of files to process per job.",
     )
     
@@ -246,33 +241,31 @@ class NanoAODTaskMuMu2024MCWOInitialRecoCorrection(EmbeddingTask):
         description="The CMSSW scram arch.",
     )
     cmssw_version = luigi.Parameter(
-        default="CMSSW_15_1_0_pre1",
+        default="CMSSW_14_2_2",
         description="The CMSSW version to use for the cmsdriver command.",
     )
     """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
 
     cmssw_branch = luigi.Parameter(
-        default="embedding_dev_CMSSW_15_1_0_pre1",
+        default="embedding_dev_CMSSW_14_2_X",
         description="The CMSSW git branch to use with the chosen cmssw version",
     )
     
-    RequiredTask = MergingTaskMuMu2024MCWOInitialRecoCorrection
+    RequiredTask = MergingTaskMuMu2024MC
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2024_mc/MuMu_wo_InitialRecoCorrection/nanoaod/{self.branch}_nanoaod.root")
+        return law.wlcg.WLCGFileTarget(f"2024_mc/MuMu/nanoaod/{self.branch}_nanoaod.root")
 
     def run(self):
         """Run the merging cmsdriver command"""
         self.run_cms_driver(
-            "",
-            step="NANO",
+            step="NANO:@TauEmbedding",
             mc=True,
             conditions="auto:phase1_2024_realistic",
             era="Run3_2024",
-            eventcontent="NANOAODSIM",
+            eventcontent="TauEmbeddingNANOAOD",
             datatier="NANOAODSIM",
-            customise="TauAnalysis/MCEmbeddingTools/customisers.customiseNanoAOD",
             filein=",".join(self.get_input_files()),
             number=self.emb_number_of_events,
         )

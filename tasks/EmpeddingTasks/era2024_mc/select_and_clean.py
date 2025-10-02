@@ -26,13 +26,13 @@ class SelectionTask2024MC(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
     )
 
     cmssw_version = luigi.Parameter(
-        default="CMSSW_15_1_0_pre1",
+        default="CMSSW_14_2_2",
         description="The CMSSW version to use for the cmsdriver command.",
     )
     """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
     
     cmssw_branch = luigi.Parameter(
-        default="embedding_dev_CMSSW_15_1_0_pre1",
+        default="embedding_dev_CMSSW_14_2_X",
         description="The CMSSW git branch to use with the chosen cmssw version",
     )
     
@@ -57,61 +57,17 @@ class SelectionTask2024MC(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
         """Run the selection cmsdriver command"""
         logger.warning(self.branch_data)
         self.run_cms_driver(
-            "RECO",
+            step="RAW2DIGI,L1Reco,RECO,PAT,FILTER:TauAnalysis/MCEmbeddingTools/Selection_FILTER_cff.makePatMuonsZmumuSelection",
+            processName="SELECT",
             mc=True,
-            step="RAW2DIGI,L1Reco,RECO,PAT",
             geometry="DB:Extended",
             conditions="auto:phase1_2024_realistic",
             era="Run3_2024",
-            eventcontent="RAWRECO",
+            eventcontent="TauEmbeddingSelection",
             datatier="RAWRECO",
-            customise="TauAnalysis/MCEmbeddingTools/customisers.customiseSelecting",
             filein=f"root://cmsdcache-kit-disk.gridka.de:1094/{self.branch_data}",
             number=self.emb_number_of_events,
         )
-
-class CleaningTaskMuMu2024MC(EmbeddingTask):
-
-    RequiredTask = SelectionTask2024MC
-    
-    cmssw_scram_arch = luigi.Parameter(
-        default="el8_amd64_gcc12",
-        description="The CMSSW scram arch.",
-    )
-    cmssw_version = luigi.Parameter(
-        default="CMSSW_15_1_0_pre1",
-        description="The CMSSW version to use for the cmsdriver command.",
-    )
-    """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
-    
-    cmssw_branch = luigi.Parameter(
-        default="embedding_dev_CMSSW_15_1_0_pre1",
-        description="The CMSSW git branch to use with the chosen cmssw version",
-    )
-    
-    def output(self):
-        """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2024_mc/MuMu/cleaning/{self.branch}_cleaning.root")
-
-    def run(self):
-        """Run the cleaning cmsdriver command"""
-        self.run_cms_driver(
-            "LHEprodandCLEAN",
-            mc=True,
-            step="RAW2DIGI,RECO,PAT",
-            geometry="DB:Extended",
-            conditions="auto:phase1_2024_realistic",
-            era="Run3_2024",
-            eventcontent="RAWRECO",
-            datatier="RAWRECO",
-            customise="TauAnalysis/MCEmbeddingTools/customisers.customiseLHEandCleaning",
-            customise_commands=(  # configs for Mu->Mu embedding
-                "'process.externalLHEProducer.particleToEmbed = cms.int32(13)'"
-            ),
-            filein=",".join(self.get_input_files()),
-            number=self.emb_number_of_events,
-        )
-
 
 class CleaningTaskTauTau2024MC(EmbeddingTask):
 
@@ -122,13 +78,13 @@ class CleaningTaskTauTau2024MC(EmbeddingTask):
         description="The CMSSW scram arch.",
     )
     cmssw_version = luigi.Parameter(
-        default="CMSSW_15_1_0_pre1",
+        default="CMSSW_14_2_2",
         description="The CMSSW version to use for the cmsdriver command.",
     )
     """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
     
     cmssw_branch = luigi.Parameter(
-        default="embedding_dev_CMSSW_15_1_0_pre1",
+        default="embedding_dev_CMSSW_14_2_X",
         description="The CMSSW git branch to use with the chosen cmssw version",
     )
     
@@ -139,15 +95,15 @@ class CleaningTaskTauTau2024MC(EmbeddingTask):
     def run(self):
         """Run the cleaning cmsdriver command"""
         self.run_cms_driver(
-            "LHEprodandCLEAN",
+            step="USER:TauAnalysis/MCEmbeddingTools/LHE_USER_cff.embeddingLHEProducerTask,RAW2DIGI,RECO",
+            processName="LHEembeddingCLEAN",
             mc=True,
-            step="RAW2DIGI,RECO,PAT",
             geometry="DB:Extended",
             conditions="auto:phase1_2024_realistic",
             era="Run3_2024",
-            eventcontent="RAWRECO",
+            eventcontent="TauEmbeddingCleaning",
             datatier="RAWRECO",
-            customise="TauAnalysis/MCEmbeddingTools/customisers.customiseLHEandCleaning",
+            procModifiers="tau_embedding_cleaning",
             filein=",".join(self.get_input_files()),
             number=self.emb_number_of_events,
         )
