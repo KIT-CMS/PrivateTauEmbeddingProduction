@@ -170,3 +170,5 @@ jobs*
 .vscode
 
 pickevents_from_data/
+CMSSW*
+repo

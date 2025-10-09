@@ -29,7 +29,7 @@ add_to_path "$BASE_DIR/luigi/bin"
 add_to_path "$BASE_DIR/law/bin"
 
 # setup law command completion
-source "$(law completion)"
+source "$(python3 -m law completion)"
 
 # index and print law tasks
-law index --verbose
+python3 -m law index --verbose

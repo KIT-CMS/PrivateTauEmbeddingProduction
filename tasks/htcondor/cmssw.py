@@ -5,15 +5,16 @@ import law
 import luigi
 from law.util import interruptable_popen, quote_cmd, rel_path
 
-from .bundle_files import BundleRepo
-from .htcondor import ETP_HTCondorWorkflow
+from ..htcondor.bundle_files import BundleRepo
+from ..htcondor.htcondor import ETP_HTCondorWorkflow
+from ..singularity_sandbox.cmssw import BundleCMSSWTask
 
 law.contrib.load("tasks", "cms", "wlcg", "git")
 
 logger = law.logger.get_logger(__name__)
 
 
-class BundleCMSSWTask(
+class BundleCMSSWcondorTask(
     ETP_HTCondorWorkflow, law.cms.BundleCMSSW, law.tasks.TransferLocalFile
 ):
     """ """
@@ -168,7 +169,7 @@ class ETP_CMSSW_HTCondorWorkflow(ETP_HTCondorWorkflow):
     cmssw_branch = luigi.Parameter(
         description="The CMSSW git branch to use with the chosen cmssw version",
     )
-    
+
     cmssw_scram_arch = luigi.Parameter(
         description="CMSSW scram architecture.",
     )
@@ -177,7 +178,7 @@ class ETP_CMSSW_HTCondorWorkflow(ETP_HTCondorWorkflow):
         description="number of failed tasks to still consider the task successful; relative "
         "fraction (<= 1) or absolute value (> 1); default: 0.0",
     )
-    
+
     exclude_params_req = set(
         [
             "emb_files_per_job",
@@ -193,15 +194,17 @@ class ETP_CMSSW_HTCondorWorkflow(ETP_HTCondorWorkflow):
     def htcondor_workflow_requires(self):
         """Adds the repo and software bundling as requirements"""
         reqs = super().htcondor_workflow_requires()
-        
-        custom_tag=self.cmssw_branch
+
+        custom_tag = self.cmssw_branch
         if self.git_cmssw_hash:
             custom_tag += f".{self.git_cmssw_hash}"
-            
+
         # add repo and software bundling as requirements when getenv is not requested
         reqs["cmssw"] = BundleCMSSWTask.req(
             self,
             custom_checksum=custom_tag,
+            sandbox=f"singularity::{self.htcondor_container_image}",
+            n_compile_cores=self.htcondor_request_cpus,
         )
         return reqs
 
@@ -352,7 +355,7 @@ class ETP_CMSSW_HTCondorWorkflow(ETP_HTCondorWorkflow):
             allowed_args = allowed_mc_args
             cmd += " --mc"
             kwargs.pop("mc")
-            
+
         for key, value in kwargs.items():
             if key in allowed_args:
                 cmd += f" --{key} {value}"
@@ -363,20 +366,22 @@ class ETP_CMSSW_HTCondorWorkflow(ETP_HTCondorWorkflow):
         # define a temporary local output file
         local_output = os.path.join(os.environ["BASE_DIR"], "cmsdriver_output.root")
         cmd += f" --fileout file:{local_output}"
-        
+
         # Specify the output python configuration file. This is then called by cmsRun.
         # This is needed, because we want to run multithreaded and the --nThreads argument in cmsDriver.py is not working.
         cmd += f" --python_filename cmsdriver_config.py --no_exec"
-        
+
         logger.info(f"Running cmsDriver.py command: {cmd}")
         code, out, err = self.run_cmssw_shell(cmd)
         logger.info(f"cmsDriver.py output:\n{out}")
-        
+
         # run the cmsRun command with the output python configuration file
         logger.info(f"Running cmsRun with {self.htcondor_request_cpus} cores")
-        code, out, err = self.run_cmssw_shell(f"cmsRun -n {self.htcondor_request_cpus} cmsdriver_config.py")
+        code, out, err = self.run_cmssw_shell(
+            f"cmsRun -n {self.htcondor_request_cpus} cmsdriver_config.py"
+        )
         logger.info(f"cmsRun output:\n{out}")
-        
+
         logger.info("Copying output file to the remote location specified in output()")
         # try to copy to the remote location and retry 10 times while waiting 5min between.
         # see https://github.com/riga/law/blob/0f619e5b556e04119e843a5c149afbd74d5d9d54/law/contrib/gfal/target.py#L332
