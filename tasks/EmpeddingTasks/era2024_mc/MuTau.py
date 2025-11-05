@@ -19,14 +19,14 @@ logger = law.logger.get_logger(__name__)
     emb_files_per_job=2,
     **default_2024_mc_param,
 )
-class CleaningTaskMuMu2024MC(EmbeddingTask):
+class CleaningTaskMuTau2024MC(EmbeddingTask):
 
     RequiredTask = SelectionTask2024MC
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
         return law.wlcg.WLCGFileTarget(
-            f"2024_mc/MuMu/cleaning/{self.branch}_cleaning.root"
+            f"2024_mc/MuTau/cleaning/{self.branch}_cleaning.root"
         )
 
     def run(self):
@@ -40,7 +40,7 @@ class CleaningTaskMuMu2024MC(EmbeddingTask):
             era="Run3_2024",
             eventcontent="TauEmbeddingCleaning",
             datatier="RAWRECO",
-            procModifiers="tau_embedding_cleaning,tau_embedding_mu_to_mu",
+            procModifiers="tau_embedding_cleaning",
             filein=",".join(self.get_input_files()),
             number=self.emb_number_of_events,
         )
@@ -51,13 +51,13 @@ class CleaningTaskMuMu2024MC(EmbeddingTask):
     htcondor_request_disk="20GB",
     **default_2024_mc_param,
 )
-class GenSimTaskMuMu2024MC(EmbeddingTask):
+class GenSimTaskMuTau2024MC(EmbeddingTask):
 
-    RequiredTask = CleaningTaskMuMu2024MC
+    RequiredTask = CleaningTaskMuTau2024MC
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2024_mc/MuMu/gensim/{self.branch}_gensim.root")
+        return law.wlcg.WLCGFileTarget(f"2024_mc/MuTau/gensim/{self.branch}_gensim.root")
 
     def run(self):
         """Run the gen cmsdriver command"""
@@ -71,7 +71,7 @@ class GenSimTaskMuMu2024MC(EmbeddingTask):
             conditions="auto:phase1_2024_realistic",  # same Global Tag as in HLTSimTask!
             eventcontent="TauEmbeddingSimGen",
             datatier="RAWSIM",
-            procModifiers="tau_embedding_sim,tau_embedding_mu_to_mu",
+            procModifiers="tau_embedding_sim,tau_embedding_mutauh",
             filein=",".join(self.get_input_files()),
             number=self.emb_number_of_events,
         )
@@ -84,13 +84,13 @@ class GenSimTaskMuMu2024MC(EmbeddingTask):
     emb_files_per_job=2,
     **default_2024_mc_param,
 )
-class HLTSimTaskMuMu2024MC(EmbeddingTask):
+class HLTSimTaskMuTau2024MC(EmbeddingTask):
 
-    RequiredTask = GenSimTaskMuMu2024MC
+    RequiredTask = GenSimTaskMuTau2024MC
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2024_mc/MuMu/hltsim/{self.branch}_hltsim.root")
+        return law.wlcg.WLCGFileTarget(f"2024_mc/MuTau/hltsim/{self.branch}_hltsim.root")
 
     def run(self):
         """Run the hlt cmsdriver command"""
@@ -118,14 +118,14 @@ class HLTSimTaskMuMu2024MC(EmbeddingTask):
     htcondor_request_disk="20GB",
     **default_2024_mc_param,
 )
-class RecoSimTaskMuMu2024MC(EmbeddingTask):
+class RecoSimTaskMuTau2024MC(EmbeddingTask):
 
-    RequiredTask = HLTSimTaskMuMu2024MC
+    RequiredTask = HLTSimTaskMuTau2024MC
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
         return law.wlcg.WLCGFileTarget(
-            f"2024_mc/MuMu/recosim/{self.branch}_recosim.root"
+            f"2024_mc/MuTau/recosim/{self.branch}_recosim.root"
         )
 
     def run(self):
@@ -154,14 +154,14 @@ class RecoSimTaskMuMu2024MC(EmbeddingTask):
     emb_files_per_job=2,
     **default_2024_mc_param,
 )
-class MergingTaskMuMu2024MC(EmbeddingTask):
+class MergingTaskMuTau2024MC(EmbeddingTask):
 
-    RequiredTask = RecoSimTaskMuMu2024MC
+    RequiredTask = RecoSimTaskMuTau2024MC
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
         return law.wlcg.WLCGFileTarget(
-            f"2024_mc/MuMu/merging/{self.branch}_merging.root"
+            f"2024_mc/MuTau/merging/{self.branch}_merging.root"
         )
 
     def run(self):
@@ -188,14 +188,14 @@ class MergingTaskMuMu2024MC(EmbeddingTask):
     emb_files_per_job=20,
     **default_2024_mc_param,
 )
-class NanoAODTaskMuMu2024MC(EmbeddingTask):
+class NanoAODTaskMuTau2024MC(EmbeddingTask):
 
-    RequiredTask = MergingTaskMuMu2024MC
+    RequiredTask = MergingTaskMuTau2024MC
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
         return law.wlcg.WLCGFileTarget(
-            f"2024_mc/MuMu/nanoaod/{self.branch}_nanoaod.root"
+            f"2024_mc/MuTau/nanoaod/{self.branch}_nanoaod.root"
         )
 
     def run(self):

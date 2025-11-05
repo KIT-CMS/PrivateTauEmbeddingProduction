@@ -2,6 +2,7 @@ import law
 import luigi
 from tasks.EmpeddingTasks import EmbeddingTask
 from tasks.htcondor.cmssw import ETP_CMSSW_HTCondorWorkflow
+from tasks.htcondor.htcondor import default_param
 
 logger = law.logger.get_logger(__name__)
 
@@ -10,36 +11,38 @@ logger = law.logger.get_logger(__name__)
 #  - CMSSW_13_0_17: Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50
 #  - CMSSW_12_4_11_patch3: The CMSSW version used in MC production for 2022 DY samples  Taken from https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_setup/EGM-Run3Summer22EEDRPremix-00004 from this chain https://cms-pdmv-prod.web.cern.ch/mcm/chained_requests?prepid=EGM-chain_Run3Summer22EEwmLHEGS_flowRun3Summer22EEDRPremix_flowRun3Summer22EEMiniAODv4_flowRun3Summer22EENanoAODv12-00001&page=0&shown=15
 
+condor_2024_param = {
+    "htcondor_accounting_group": "cms.higgs",
+    "htcondor_container_image": "/cvmfs/unpacked.cern.ch/registry.hub.docker.com/cmssw/cms:rhel8-m",
+    "lcg_stack": "/cvmfs/sft.cern.ch/lcg/views/LCG_104/x86_64-centos8-gcc11-opt/setup.sh",
+    "retries": 0,
+}
+cmssw_2024_param_HLT = {
+    "git_cmssw_hash": "0c40c8a67d1",
+    "cmssw_version": "CMSSW_14_0_21_patch4",
+    "cmssw_branch": "embedding_dev_CMSSW_14_0_X",
+    "cmssw_scram_arch": "el8_amd64_gcc12",
+}
+cmssw_2024_param_15 = {
+    "git_cmssw_hash": "c52227a",
+    "cmssw_version": "CMSSW_15_0_15",
+    "cmssw_branch": "embedding_dev_CMSSW_15_0_4_p3_improveCode",
+    "cmssw_scram_arch": "el8_amd64_gcc12",
+}
 
-
+@default_param(
+    htcondor_walltime="6200", # = 1h 43min
+    htcondor_request_cpus="8",
+    htcondor_request_memory="6GB",
+    htcondor_request_disk="2GB",
+    emb_filelist="Run2024C-v1_RAW_sub.txt",
+    emb_number_of_events=-1,
+    **condor_2024_param,
+    **cmssw_2024_param_HLT,
+)
 class SelectionTask2024(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
     """This class is the first step in the embedding workflow. Therfore can't inherit from EmbeddingTask"""
 
-    emb_number_of_events = luigi.Parameter(
-        default="-1",
-        description="Number of events to process. Default is -1, which means all events.",
-    )
-
-    emb_filelist = luigi.Parameter(
-        default= "Run2024C-v1_RAW_sub.txt",
-        description="List of input files.",
-    )
-
-    cmssw_version = luigi.Parameter(
-        default="CMSSW_14_2_2",
-        description="The CMSSW version to use for the cmsdriver command.",
-    )
-    """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
-    
-    cmssw_branch = luigi.Parameter(
-        default="embedding_dev_CMSSW_14_2_X",
-        description="The CMSSW git branch to use with the chosen cmssw version",
-    )
-    
-    cmssw_scram_arch = luigi.Parameter(
-        default="el8_amd64_gcc12",
-        description="The CMSSW scram arch.",
-    )
     def create_branch_map(self):
         """This branch map maps one file from the filelist in the filelists folder to one job (branch)"""
         filelist_path = law.util.rel_path(__file__, "filelists", self.emb_filelist)
@@ -61,7 +64,7 @@ class SelectionTask2024(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
             processName="SELECT",
             data=True,
             scenario="pp",
-            conditions="auto:run3_data",
+            conditions="140X_dataRun3_v20",
             era="Run3_2024",
             eventcontent="TauEmbeddingSelection",
             datatier="RAWRECO",
@@ -69,24 +72,18 @@ class SelectionTask2024(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
             number=self.emb_number_of_events,
         )
 
+@default_param(
+    htcondor_walltime="4800",
+    htcondor_request_cpus="8",
+    htcondor_request_memory="6GB",
+    htcondor_request_disk="10GB",
+    emb_files_per_job=2,
+    **condor_2024_param,
+    **cmssw_2024_param_HLT,
+)
 class CleaningTaskTauTau2024(EmbeddingTask):
 
     RequiredTask = SelectionTask2024
-    
-    cmssw_scram_arch = luigi.Parameter(
-        default="el8_amd64_gcc12",
-        description="The CMSSW scram arch.",
-    )
-    cmssw_version = luigi.Parameter(
-        default="CMSSW_14_2_2",
-        description="The CMSSW version to use for the cmsdriver command.",
-    )
-    """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
-    
-    cmssw_branch = luigi.Parameter(
-        default="embedding_dev_CMSSW_14_2_X",
-        description="The CMSSW git branch to use with the chosen cmssw version",
-    )
     
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
@@ -99,7 +96,7 @@ class CleaningTaskTauTau2024(EmbeddingTask):
             processName="LHEembeddingCLEAN",
             data=True,
             scenario="pp",
-            conditions="auto:run3_data",
+            conditions="140X_dataRun3_v20",
             era="Run3_2024",
             eventcontent="TauEmbeddingCleaning",
             datatier="RAWRECO",

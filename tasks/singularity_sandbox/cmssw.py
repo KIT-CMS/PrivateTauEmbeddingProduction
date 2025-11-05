@@ -9,20 +9,30 @@ law.contrib.load("tasks", "singularity", "cms", "wlcg", "git")
 
 logger = law.logger.get_logger(__name__)
 
+
 class BundleCMSSWTask(
     law.SandboxTask, law.cms.BundleCMSSW, law.tasks.TransferLocalFile
 ):
     """ """
+
     sandbox = luigi.Parameter(
         default="",
         description="path to a sandbox file to be used for the job; default: ''",
     )
-    singularity_args = lambda x: ["-B", "/cvmfs", "-B", os.getcwd(), "-B", "/home/cwinter/.globus/x509up"]
+    singularity_args = lambda x: [
+        "-B",
+        "/cvmfs",
+        "-B",
+        os.getcwd(),
+        "-B",
+        "/home/cwinter/.globus/x509up",
+    ]
+
     def sandbox_post_setup_cmds(self):
-        bootstrap_file =  law.util.rel_path(__file__, "setup_cmssw.sh")
+        bootstrap_file = law.util.rel_path(__file__, "setup_cmssw.sh")
         return [
             "export X509_USER_PROXY=/home/cwinter/.globus/x509up",
-            f"source {bootstrap_file} {self.cmssw_version} {self.cmssw_branch} {self.cmssw_scram_arch} {self.n_compile_cores}"
+            f"source {bootstrap_file} {self.cmssw_version} {self.cmssw_branch} {self.cmssw_scram_arch} {self.n_compile_cores}",
         ]
 
     # replicas = luigi.IntParameter(
@@ -45,7 +55,7 @@ class BundleCMSSWTask(
         default=4,
         description="Number of cores to use for compiling CMSSW.",
     )
-    
+
     # Don't know what this is for
     # Set it to None as in the example
     version = None

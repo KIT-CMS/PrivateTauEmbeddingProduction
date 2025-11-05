@@ -4,26 +4,23 @@ import luigi
 from tasks.EmpeddingTasks import EmbeddingTask
 from tasks.EmpeddingTasks.era2024.select_and_clean import (
     CleaningTaskTauTau2024,
+    condor_2024_param,
+    cmssw_2024_param_HLT,
+    cmssw_2024_param_15
 )
+from tasks.htcondor.htcondor import default_param
 
 logger = law.logger.get_logger(__name__)
 
+@default_param(
+    htcondor_walltime="3600",
+    htcondor_request_cpus="8",
+    htcondor_request_memory="8GB",
+    htcondor_request_disk="10GB",
+    **condor_2024_param,
+    **cmssw_2024_param_HLT,
+)
 class GenSimTaskMuTau2024(EmbeddingTask):
-    
-    cmssw_scram_arch = luigi.Parameter(
-        default="el8_amd64_gcc12",
-        description="The CMSSW scram arch.",
-    )
-    cmssw_version = luigi.Parameter(
-        default="CMSSW_14_2_2",
-        description="The CMSSW version to use for the cmsdriver command.",
-    )
-    """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
-
-    cmssw_branch = luigi.Parameter(
-        default="embedding_dev_CMSSW_14_2_X",
-        description="The CMSSW git branch to use with the chosen cmssw version",
-    )
     
     RequiredTask = CleaningTaskTauTau2024
 
@@ -49,31 +46,17 @@ class GenSimTaskMuTau2024(EmbeddingTask):
             number=self.emb_number_of_events,
         )
 
-
+@default_param(
+    htcondor_walltime="7800",
+    htcondor_request_cpus="4",
+    htcondor_request_memory="4GB",
+    htcondor_request_disk="20GB",
+    emb_files_per_job=2,
+    **condor_2024_param,
+    **cmssw_2024_param_HLT,
+)
 class HLTSimTaskMuTau2024(EmbeddingTask):
-    emb_files_per_job = luigi.IntParameter(
-        default=3,
-        description="Number of files to process per job.",
-    )
-    cmssw_version = luigi.Parameter(
-        default="CMSSW_14_2_2",
-        description="The CMSSW version to use for the cmsdriver command.",
-    )
-    """
-    The needed CMSSW version for this task.
-    Taken from https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_setup/EGM-Run3Summer22EEDRPremix-00004 
-    from this chain https://cms-pdmv-prod.web.cern.ch/mcm/chained_requests?prepid=EGM-chain_Run3Summer22EEwmLHEGS_flowRun3Summer22EEDRPremix_flowRun3Summer22EEMiniAODv4_flowRun3Summer22EENanoAODv12-00001&page=0&shown=15
-    """
     
-    cmssw_branch = luigi.Parameter(
-        default="embedding_dev_CMSSW_14_2_X",
-        description="The CMSSW git branch to use with the chosen cmssw version",
-    )
-    
-    cmssw_scram_arch = luigi.Parameter(
-        default="el8_amd64_gcc12",
-        description="The CMSSW scram arch.",
-    )
     RequiredTask = GenSimTaskMuTau2024
 
     def output(self):
@@ -97,29 +80,15 @@ class HLTSimTaskMuTau2024(EmbeddingTask):
             number=self.emb_number_of_events,
         )
 
-
+@default_param(
+    htcondor_walltime="6700",
+    htcondor_request_cpus="2",
+    htcondor_request_memory="4GB",
+    htcondor_request_disk="20GB",
+    **condor_2024_param,
+    **cmssw_2024_param_HLT,
+)
 class RecoSimTaskMuTau2024(EmbeddingTask):
-    
-    cmssw_version = luigi.Parameter(
-        default="CMSSW_14_2_2",
-        description="The CMSSW version to use for the cmsdriver command.",
-    )
-    """
-    The needed CMSSW version for this task.
-    Taken from https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_setup/EGM-Run3Summer22EEDRPremix-00004 
-    from this chain https://cms-pdmv-prod.web.cern.ch/mcm/chained_requests?prepid=EGM-chain_Run3Summer22EEwmLHEGS_flowRun3Summer22EEDRPremix_flowRun3Summer22EEMiniAODv4_flowRun3Summer22EENanoAODv12-00001&page=0&shown=15
-    """
-    
-    cmssw_branch = luigi.Parameter(
-        default="embedding_dev_CMSSW_14_2_X",
-        description="The CMSSW git branch to use with the chosen cmssw version",
-    )
-    
-    cmssw_scram_arch = luigi.Parameter(
-        default="el8_amd64_gcc12",
-        description="The CMSSW scram arch.",
-    )
-    """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
 
     RequiredTask = HLTSimTaskMuTau2024
 
@@ -144,23 +113,16 @@ class RecoSimTaskMuTau2024(EmbeddingTask):
             number=self.emb_number_of_events,
         )
 
-
+@default_param(
+    htcondor_walltime="4200",
+    htcondor_request_cpus="1",
+    htcondor_request_memory="4GB",
+    htcondor_request_disk="300MB",
+    emb_files_per_job=2,
+    **condor_2024_param,
+    **cmssw_2024_param_15,
+)
 class MergingTaskMuTau2024(EmbeddingTask):
-    
-    cmssw_scram_arch = luigi.Parameter(
-        default="el8_amd64_gcc12",
-        description="The CMSSW scram arch.",
-    )
-    cmssw_version = luigi.Parameter(
-        default="CMSSW_14_2_2",
-        description="The CMSSW version to use for the cmsdriver command.",
-    )
-    """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
-
-    cmssw_branch = luigi.Parameter(
-        default="embedding_dev_CMSSW_14_2_X",
-        description="The CMSSW git branch to use with the chosen cmssw version",
-    )
     
     RequiredTask = RecoSimTaskMuTau2024
 
@@ -184,27 +146,16 @@ class MergingTaskMuTau2024(EmbeddingTask):
             number=self.emb_number_of_events,
         )
 
+@default_param(
+    htcondor_walltime="900",
+    htcondor_request_cpus="2",
+    htcondor_request_memory="2GB",
+    htcondor_request_disk="300MB",
+    emb_files_per_job=20,
+    **condor_2024_param,
+    **cmssw_2024_param_15,
+)
 class NanoAODTaskMuTau2024(EmbeddingTask):
-    
-    emb_files_per_job = luigi.IntParameter(
-        default=20,
-        description="Number of files to process per job.",
-    )
-    
-    cmssw_scram_arch = luigi.Parameter(
-        default="el8_amd64_gcc12",
-        description="The CMSSW scram arch.",
-    )
-    cmssw_version = luigi.Parameter(
-        default="CMSSW_14_2_2",
-        description="The CMSSW version to use for the cmsdriver command.",
-    )
-    """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
-
-    cmssw_branch = luigi.Parameter(
-        default="embedding_dev_CMSSW_14_2_X",
-        description="The CMSSW git branch to use with the chosen cmssw version",
-    )
     
     RequiredTask = MergingTaskMuTau2024
 

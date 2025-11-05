@@ -9,6 +9,18 @@ from .bundle_files import BundleRepo
 law.contrib.load("htcondor")
 logger = law.logger.get_logger(__name__)
 
+def default_param(**kwargs):
+    def decorator(cls):
+        for param_name, default_value in kwargs.items():
+            if isinstance(default_value, int):
+                setattr(cls, param_name, luigi.IntParameter(default=default_value))
+            elif isinstance(default_value, float):
+                setattr(cls, param_name, luigi.FloatParameter(default=default_value))
+            else:
+                setattr(cls, param_name, luigi.Parameter(default=str(default_value)))
+        return cls
+    return decorator
+
 class ETP_HTCondorWorkflow(law.htcondor.HTCondorWorkflow):
     """
     Abstract class for ETP HTCondor workflows. It extends the HTCondorWorkflow class from law.

@@ -2,6 +2,7 @@ import law
 import luigi
 from tasks.EmpeddingTasks import EmbeddingTask
 from tasks.htcondor.cmssw import ETP_CMSSW_HTCondorWorkflow
+from tasks.htcondor.htcondor import default_param
 
 logger = law.logger.get_logger(__name__)
 
@@ -9,37 +10,33 @@ logger = law.logger.get_logger(__name__)
 # CMSSW versions:
 #  - CMSSW_13_0_17: Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50
 #  - CMSSW_12_4_11_patch3: The CMSSW version used in MC production for 2022 DY samples  Taken from https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_setup/EGM-Run3Summer22EEDRPremix-00004 from this chain https://cms-pdmv-prod.web.cern.ch/mcm/chained_requests?prepid=EGM-chain_Run3Summer22EEwmLHEGS_flowRun3Summer22EEDRPremix_flowRun3Summer22EEMiniAODv4_flowRun3Summer22EENanoAODv12-00001&page=0&shown=15
+default_2024_mc_htcondor_param = {
+    "htcondor_accounting_group": "cms.higgs",
+    "htcondor_container_image": "/cvmfs/unpacked.cern.ch/registry.hub.docker.com/cmssw/cms:rhel8-m",
+    "lcg_stack": "/cvmfs/sft.cern.ch/lcg/views/LCG_104/x86_64-centos8-gcc11-opt/setup.sh",
+    "retries": 3,
+}
+default_2024_mc_cmssw_param = {
+    "git_cmssw_hash": "2103a99ae6a",
+    "cmssw_version": "CMSSW_15_1_0_pre6",
+    "cmssw_branch": "embedding_mc_CMSSW_15_1_X",
+    "cmssw_scram_arch": "el8_amd64_gcc12",
+}
+default_2024_mc_param = default_2024_mc_htcondor_param | default_2024_mc_cmssw_param
 
 
-
+@default_param(
+    htcondor_walltime="6200", # = 1h 43min
+    htcondor_request_cpus="10",
+    htcondor_request_memory="8GB",
+    htcondor_request_disk="40GB",
+    emb_filelist="artur_2024_mc_prod.filelist",
+    emb_number_of_events=-1,
+    **default_2024_mc_param,
+)
 class SelectionTask2024MC(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
     """This class is the first step in the embedding workflow. Therfore can't inherit from EmbeddingTask"""
 
-    emb_number_of_events = luigi.Parameter(
-        default="-1",
-        description="Number of events to process. Default is -1, which means all events.",
-    )
-
-    emb_filelist = luigi.Parameter(
-        default= "artur_2024_mc_prod.filelist",
-        description="List of input files.",
-    )
-
-    cmssw_version = luigi.Parameter(
-        default="CMSSW_14_2_2",
-        description="The CMSSW version to use for the cmsdriver command.",
-    )
-    """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
-    
-    cmssw_branch = luigi.Parameter(
-        default="embedding_dev_CMSSW_14_2_X",
-        description="The CMSSW git branch to use with the chosen cmssw version",
-    )
-    
-    cmssw_scram_arch = luigi.Parameter(
-        default="el8_amd64_gcc12",
-        description="The CMSSW scram arch.",
-    )
     def create_branch_map(self):
         """This branch map maps one file from the filelist in the filelists folder to one job (branch)"""
         filelist_path = law.util.rel_path(__file__, "filelists", self.emb_filelist)
@@ -69,25 +66,18 @@ class SelectionTask2024MC(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
             number=self.emb_number_of_events,
         )
 
+
+@default_param(
+    htcondor_walltime="2200",
+    htcondor_request_cpus="4",
+    htcondor_request_memory="5GB",
+    htcondor_request_disk="15GB",
+    **default_2024_mc_param,
+)
 class CleaningTaskTauTau2024MC(EmbeddingTask):
 
     RequiredTask = SelectionTask2024MC
-    
-    cmssw_scram_arch = luigi.Parameter(
-        default="el8_amd64_gcc12",
-        description="The CMSSW scram arch.",
-    )
-    cmssw_version = luigi.Parameter(
-        default="CMSSW_14_2_2",
-        description="The CMSSW version to use for the cmsdriver command.",
-    )
-    """Use the CMSSW version used in the ReReco campaign: https://cms-pdmv-prod.web.cern.ch/rereco/requests?input_dataset=/Muon/Run2022G-v1/RAW&shown=127&page=0&limit=50"""
-    
-    cmssw_branch = luigi.Parameter(
-        default="embedding_dev_CMSSW_14_2_X",
-        description="The CMSSW git branch to use with the chosen cmssw version",
-    )
-    
+
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
         return law.wlcg.WLCGFileTarget(f"2024_mc/cleaning/{self.branch}_cleaning.root")
