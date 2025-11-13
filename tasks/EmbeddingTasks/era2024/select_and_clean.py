@@ -35,7 +35,6 @@ cmssw_2024_param_15 = {
     htcondor_request_cpus="8",
     htcondor_request_memory="6GB",
     htcondor_request_disk="2GB",
-    emb_filelist="Run2024C-v1_RAW_sub.txt",
     emb_number_of_events=-1,
     **condor_2024_param,
     **cmssw_2024_param_HLT,
@@ -43,9 +42,11 @@ cmssw_2024_param_15 = {
 class SelectionTask2024(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
     """This class is the first step in the embedding workflow. Therfore can't inherit from EmbeddingTask"""
 
+    emb_filelist = luigi.Parameter()
+
     def create_branch_map(self):
         """This branch map maps one file from the filelist in the filelists folder to one job (branch)"""
-        filelist_path = law.util.rel_path(__file__, "filelists", self.emb_filelist)
+        filelist_path = law.util.rel_path(__file__, "filelists/copied_to_disk", self.emb_filelist)
         with open(filelist_path, "r") as f:
             files = [i.strip() for i in f.readlines() if i.strip()]
         return {i: file for i, file in enumerate(files)}
