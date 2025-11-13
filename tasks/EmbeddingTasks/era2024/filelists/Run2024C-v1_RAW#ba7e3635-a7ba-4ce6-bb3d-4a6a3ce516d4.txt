@@ -1,0 +1,2 @@
+/store/data/Run2024C/Muon0/RAW/v1/000/379/765/00000/5bca3e6f-d94f-4811-b4e0-a6d9f6e5894d.root
+/store/data/Run2024C/Muon0/RAW/v1/000/379/831/00000/ca2a7b67-2a10-4cc1-be8a-7da952624650.root
