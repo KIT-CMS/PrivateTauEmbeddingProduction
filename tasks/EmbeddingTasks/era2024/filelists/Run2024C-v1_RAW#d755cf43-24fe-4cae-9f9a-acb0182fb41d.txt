@@ -497,3 +497,4 @@
 /store/data/Run2024C/Muon0/RAW/v1/000/380/115/00000/ff245d4b-f5e8-43bb-9eba-afb1608acf09.root
 /store/data/Run2024C/Muon0/RAW/v1/000/380/115/00000/ff595778-e115-4955-967c-0aeb6cc59e79.root
 /store/data/Run2024C/Muon0/RAW/v1/000/380/115/00000/ffa017c9-bb27-49b5-9b32-365fe9143999.root
+/store/data/Run2024C/Muon0/RAW/v1/000/380/074/00000/0e58d4a6-caab-4749-bbf2-63bc6bcd3428.root

@@ -15,7 +15,7 @@ condor_2024_param = {
     "htcondor_accounting_group": "cms.higgs",
     "htcondor_container_image": "/cvmfs/unpacked.cern.ch/registry.hub.docker.com/cmssw/cms:rhel8-m",
     "lcg_stack": "/cvmfs/sft.cern.ch/lcg/views/LCG_104/x86_64-centos8-gcc11-opt/setup.sh",
-    "retries": 0,
+    "retries": 2,
 }
 cmssw_2024_param_HLT = {
     "git_cmssw_hash": "0c40c8a67d1",
@@ -42,7 +42,7 @@ cmssw_2024_param_15 = {
 class SelectionTask2024(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
     """This class is the first step in the embedding workflow. Therfore can't inherit from EmbeddingTask"""
 
-    emb_filelist = luigi.Parameter()
+    emb_filelist = "Muon0_Run2024C-v1_RAW_files_1.txt"
 
     def create_branch_map(self):
         """This branch map maps one file from the filelist in the filelists folder to one job (branch)"""
@@ -53,8 +53,9 @@ class SelectionTask2024(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
+        hash_id = law.util.create_hash(self.branch_data)
         return law.wlcg.WLCGFileTarget(
-            f"2024/selection/{self.branch}_selection.root"
+            f"2024/selection/{self.branch}_selection_{hash_id}.root"
         )
 
     def run(self):

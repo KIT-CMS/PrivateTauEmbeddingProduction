@@ -13,11 +13,11 @@ from tasks.htcondor.htcondor import default_param
 logger = law.logger.get_logger(__name__)
 
 @default_param(
-    htcondor_walltime="4800",
+    htcondor_walltime="8400",
     htcondor_request_cpus="8",
     htcondor_request_memory="6GB",
-    htcondor_request_disk="10GB",
-    emb_files_per_job=2,
+    htcondor_request_disk="14GB",
+    emb_files_per_job=3,
     **condor_2024_param,
     **cmssw_2024_param_HLT,
 )
@@ -27,7 +27,7 @@ class CleaningTaskMuMu2024(EmbeddingTask):
     
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2024/MuMu/cleaning/{self.branch}_cleaning.root")
+        return law.wlcg.WLCGFileTarget(f"2024/MuMu/cleaning/{self.branch}_cleaning_{self.output_file_suffix()}.root")
 
     def run(self):
         """Run the cleaning cmsdriver command"""
@@ -46,10 +46,11 @@ class CleaningTaskMuMu2024(EmbeddingTask):
         )
         
 @default_param(
-    htcondor_walltime="3600",
+    htcondor_walltime="4800",
     htcondor_request_cpus="8",
     htcondor_request_memory="8GB",
     htcondor_request_disk="10GB",
+    emb_files_per_job=3,
     **condor_2024_param,
     **cmssw_2024_param_HLT,
 )
@@ -59,7 +60,7 @@ class GenSimTaskMuMu2024(EmbeddingTask):
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2024/MuMu/gensim/{self.branch}_gensim.root")
+        return law.wlcg.WLCGFileTarget(f"2024/MuMu/gensim/{self.branch}_gensim_{self.output_file_suffix()}.root")
 
     def run(self):
         """Run the gen cmsdriver command"""
@@ -84,7 +85,6 @@ class GenSimTaskMuMu2024(EmbeddingTask):
     htcondor_request_cpus="4",
     htcondor_request_memory="4GB",
     htcondor_request_disk="20GB",
-    emb_files_per_job=2,
     **condor_2024_param,
     **cmssw_2024_param_HLT,
 )
@@ -94,7 +94,7 @@ class HLTSimTaskMuMu2024(EmbeddingTask):
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2024/MuMu/hltsim/{self.branch}_hltsim.root")
+        return law.wlcg.WLCGFileTarget(f"2024/MuMu/hltsim/{self.branch}_hltsim_{self.output_file_suffix()}.root")
 
     def run(self):
         """Run the hlt cmsdriver command"""
@@ -127,7 +127,7 @@ class RecoSimTaskMuMu2024(EmbeddingTask):
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2024/MuMu/recosim/{self.branch}_recosim.root")
+        return law.wlcg.WLCGFileTarget(f"2024/MuMu/recosim/{self.branch}_recosim_{self.output_file_suffix()}.root")
 
     def run(self):
         """Run the reco cmsdriver command"""
@@ -150,8 +150,8 @@ class RecoSimTaskMuMu2024(EmbeddingTask):
     htcondor_walltime="4200",
     htcondor_request_cpus="1",
     htcondor_request_memory="4GB",
-    htcondor_request_disk="300MB",
-    emb_files_per_job=2,
+    htcondor_request_disk="1GB",
+    emb_files_per_job=5,
     **condor_2024_param,
     **cmssw_2024_param_15,
 )
@@ -161,7 +161,7 @@ class MergingTaskMuMu2024(EmbeddingTask):
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2024/MuMu/merging/{self.branch}_merging.root")
+        return law.wlcg.WLCGFileTarget(f"2024/MuMu/merging/{self.branch}_merging_{self.output_file_suffix()}.root")
 
     def run(self):
         """Run the merging cmsdriver command"""
@@ -184,7 +184,7 @@ class MergingTaskMuMu2024(EmbeddingTask):
     htcondor_request_cpus="2",
     htcondor_request_memory="2GB",
     htcondor_request_disk="300MB",
-    emb_files_per_job=20,
+    emb_files_per_job=2,
     **condor_2024_param,
     **cmssw_2024_param_15,
 )
@@ -194,7 +194,7 @@ class NanoAODTaskMuMu2024(EmbeddingTask):
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2024/MuMu/nanoaod/{self.branch}_nanoaod.root")
+        return law.wlcg.WLCGFileTarget(f"2024/MuMu/nanoaod/{self.branch}_nanoaod_{self.output_file_suffix()}.root")
 
     def run(self):
         """Run the merging cmsdriver command"""

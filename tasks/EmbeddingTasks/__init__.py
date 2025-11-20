@@ -20,7 +20,7 @@ class EmbeddingTask(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
     # cmssw_version = luigi.Parameter(
     #     description="The CMSSW version to use for the cmsdriver command.",
     # )
-     
+
     # cmssw_branch = luigi.Parameter(
     #     description="The CMSSW git branch to use with the chosen cmssw version",
     # )
@@ -48,7 +48,7 @@ class EmbeddingTask(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
         branch_chunks = self.RequiredTask().get_all_branch_chunks(
             self.emb_files_per_job
         )
-        return {i: chunk for i, chunk in enumerate(branch_chunks)}
+        return dict(enumerate(branch_chunks))
 
     def workflow_requires(self):
         """Requires the RequiredTask"""
@@ -60,7 +60,7 @@ class EmbeddingTask(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
 
     def get_input_files(self):
         """Get the input files from the RequiredTask output"""
-        # get the input files from the output of the PreselectionTask
+        # get the input files from the output of the RequiredTask
         # this is a bit complicated as the output of a Workflow Task is in a dictionarry with the key 'collection'
         # and the value is a law.SiblingFileCollection
         all_files = [
@@ -69,3 +69,6 @@ class EmbeddingTask(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
         ]
         return [all_files[i] for i in self.branch_data]
 
+    def output_file_suffix(self):
+        """Get the output file suffix based on the branch_data"""
+        return "+".join(map(str, self.branch_data))
