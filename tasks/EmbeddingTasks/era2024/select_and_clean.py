@@ -15,7 +15,7 @@ condor_2024_param = {
     "htcondor_accounting_group": "cms.higgs",
     "htcondor_container_image": "/cvmfs/unpacked.cern.ch/registry.hub.docker.com/cmssw/cms:rhel8-m",
     "lcg_stack": "/cvmfs/sft.cern.ch/lcg/views/LCG_104/x86_64-centos8-gcc11-opt/setup.sh",
-    "retries": 2,
+    "retries": 0,
 }
 cmssw_2024_param_HLT = {
     "git_cmssw_hash": "0c40c8a67d1",
@@ -39,10 +39,14 @@ cmssw_2024_param_15 = {
     **condor_2024_param,
     **cmssw_2024_param_HLT,
 )
-class SelectionTask2024(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
+class SelectionTask2024(ETP_CMSSW_HTCondorWorkflow):
     """This class is the first step in the embedding workflow. Therfore can't inherit from EmbeddingTask"""
 
-    emb_filelist = "Muon0_Run2024C-v1_RAW_files_1.txt"
+    emb_filelist = "Muon0_Run2024C-v1_RAW_files_1_2.txt"
+
+    # This is the default and doesn't need to be set explicitly:
+    # output_collection_cls = law.SiblingFileCollection
+
 
     def create_branch_map(self):
         """This branch map maps one file from the filelist in the filelists folder to one job (branch)"""

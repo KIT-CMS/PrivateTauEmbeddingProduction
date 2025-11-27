@@ -4,7 +4,7 @@ import luigi
 from ..htcondor.cmssw import ETP_CMSSW_HTCondorWorkflow
 
 
-class EmbeddingTask(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
+class EmbeddingTask(ETP_CMSSW_HTCondorWorkflow):
     """This class combines common functionality for embedding Tasks"""
 
     emb_number_of_events = luigi.Parameter(
@@ -30,7 +30,10 @@ class EmbeddingTask(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
     # )
 
     RequiredTask = None
-
+    
+    # This is the default and doesn't need to be set explicitly:
+    # output_collection_cls = law.SiblingFileCollection
+    
     exclude_params_req = set(
         [
             "emb_number_of_events",
@@ -51,12 +54,11 @@ class EmbeddingTask(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
         return dict(enumerate(branch_chunks))
 
     def workflow_requires(self):
-        """Requires the RequiredTask"""
+        """
+        What a workflow job requires to run. This is checked only once and not per branch (as with requires()),
+        which improves the performance and avoids the same checks for all jobs.
+        """
         return {"files": self.RequiredTask()}
-
-    def requires(self):
-        """What the single jobs require to run, is in this case the RequiredTask jobs which provide the files specified in branch_data"""
-        return self.RequiredTask()
 
     def get_input_files(self):
         """Get the input files from the RequiredTask output"""
@@ -65,7 +67,7 @@ class EmbeddingTask(ETP_CMSSW_HTCondorWorkflow, law.LocalWorkflow):
         # and the value is a law.SiblingFileCollection
         all_files = [
             wlcg_target.uri()
-            for wlcg_target in self.input()["collection"].targets.values()
+            for wlcg_target in self.workflow_input().files.collection.targets.values()
         ]
         return [all_files[i] for i in self.branch_data]
 
