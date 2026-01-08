@@ -169,7 +169,7 @@ class MergingTaskMuMu2024(EmbeddingTask):
             step="USER:TauAnalysis/MCEmbeddingTools/Merging_USER_cff.merge_step,PAT",
             processName="MERGE",
             data=True,
-            conditions="140X_dataRun3_v17",
+            conditions="140X_dataRun3_v20",
             era="Run3_2024",
             eventcontent="TauEmbeddingMergeMINIAOD",
             datatier="USER",

@@ -42,7 +42,7 @@ cmssw_2024_param_15 = {
 class SelectionTask2024(ETP_CMSSW_HTCondorWorkflow):
     """This class is the first step in the embedding workflow. Therfore can't inherit from EmbeddingTask"""
 
-    emb_filelist = "Muon0_Run2024C-v1_RAW_files_1_2.txt"
+    emb_filelist = "Muon0_Run2024C-v1_RAW_files_1_2_3.txt"
 
     # This is the default and doesn't need to be set explicitly:
     # output_collection_cls = law.SiblingFileCollection
@@ -79,11 +79,11 @@ class SelectionTask2024(ETP_CMSSW_HTCondorWorkflow):
         )
 
 @default_param(
-    htcondor_walltime="4800",
+    htcondor_walltime="8400",
     htcondor_request_cpus="8",
     htcondor_request_memory="6GB",
-    htcondor_request_disk="10GB",
-    emb_files_per_job=2,
+    htcondor_request_disk="20GB",
+    emb_files_per_job=3,
     **condor_2024_param,
     **cmssw_2024_param_HLT,
 )
@@ -93,7 +93,7 @@ class CleaningTaskTauTau2024(EmbeddingTask):
     
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2024/cleaning/{self.branch}_cleaning.root")
+        return law.wlcg.WLCGFileTarget(f"2024/cleaning/{self.branch}_cleaning_{self.output_file_suffix()}.root")
 
     def run(self):
         """Run the cleaning cmsdriver command"""

@@ -13,10 +13,11 @@ from tasks.htcondor.htcondor import default_param
 logger = law.logger.get_logger(__name__)
 
 @default_param(
-    htcondor_walltime="3600",
+    htcondor_walltime="4800",
     htcondor_request_cpus="8",
     htcondor_request_memory="8GB",
-    htcondor_request_disk="10GB",
+    htcondor_request_disk="70GB",
+    emb_files_per_job=3,
     **condor_2024_param,
     **cmssw_2024_param_HLT,
 )
@@ -26,7 +27,7 @@ class GenSimTaskMuTau2024(EmbeddingTask):
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2024/MuTau/gensim/{self.branch}_gensim.root")
+        return law.wlcg.WLCGFileTarget(f"2024/MuTau/gensim/{self.branch}_gensim_{self.output_file_suffix()}.root")
 
     def run(self):
         """Run the gen cmsdriver command"""
@@ -38,7 +39,7 @@ class GenSimTaskMuTau2024(EmbeddingTask):
             beamspot="DBrealistic",
             geometry="DB:Extended",
             era="Run3_2024",
-            conditions="auto:phase1_2024_realistic", # same Global Tag as in HLTSimTask!
+            conditions="140X_mcRun3_2024_realistic_v26", # same Global Tag as in HLTSimTask!
             eventcontent="TauEmbeddingSimGen",
             datatier="RAWSIM",
             procModifiers="tau_embedding_sim,tau_embedding_mutauh",
@@ -50,8 +51,7 @@ class GenSimTaskMuTau2024(EmbeddingTask):
     htcondor_walltime="7800",
     htcondor_request_cpus="4",
     htcondor_request_memory="4GB",
-    htcondor_request_disk="20GB",
-    emb_files_per_job=2,
+    htcondor_request_disk="70GB",
     **condor_2024_param,
     **cmssw_2024_param_HLT,
 )
@@ -61,7 +61,7 @@ class HLTSimTaskMuTau2024(EmbeddingTask):
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2024/MuTau/hltsim/{self.branch}_hltsim.root")
+        return law.wlcg.WLCGFileTarget(f"2024/MuTau/hltsim/{self.branch}_hltsim_{self.output_file_suffix()}.root")
 
     def run(self):
         """Run the hlt cmsdriver command"""
@@ -73,7 +73,7 @@ class HLTSimTaskMuTau2024(EmbeddingTask):
             beamspot="DBrealistic",
             geometry="DB:Extended",
             era="Run3_2024",
-            conditions="auto:phase1_2024_realistic",
+            conditions="140X_mcRun3_2024_realistic_v26",
             eventcontent="TauEmbeddingSimHLT",
             datatier="RAWSIM",
             filein=",".join(self.get_input_files()),
@@ -84,7 +84,7 @@ class HLTSimTaskMuTau2024(EmbeddingTask):
     htcondor_walltime="6700",
     htcondor_request_cpus="2",
     htcondor_request_memory="4GB",
-    htcondor_request_disk="20GB",
+    htcondor_request_disk="70GB",
     **condor_2024_param,
     **cmssw_2024_param_HLT,
 )
@@ -94,7 +94,7 @@ class RecoSimTaskMuTau2024(EmbeddingTask):
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2024/MuTau/recosim/{self.branch}_recosim.root")
+        return law.wlcg.WLCGFileTarget(f"2024/MuTau/recosim/{self.branch}_recosim_{self.output_file_suffix()}.root")
 
     def run(self):
         """Run the reco cmsdriver command"""
@@ -105,7 +105,7 @@ class RecoSimTaskMuTau2024(EmbeddingTask):
             beamspot="DBrealistic",
             geometry="DB:Extended",
             era="Run3_2024",
-            conditions="auto:phase1_2024_realistic",
+            conditions="140X_mcRun3_2024_realistic_v26",
             eventcontent="TauEmbeddingSimReco",
             datatier="RAW-RECO-SIM",
             procModifiers="tau_embedding_sim",
@@ -117,8 +117,8 @@ class RecoSimTaskMuTau2024(EmbeddingTask):
     htcondor_walltime="4200",
     htcondor_request_cpus="1",
     htcondor_request_memory="4GB",
-    htcondor_request_disk="300MB",
-    emb_files_per_job=2,
+    htcondor_request_disk="2GB",
+    emb_files_per_job=5,
     **condor_2024_param,
     **cmssw_2024_param_15,
 )
@@ -128,7 +128,7 @@ class MergingTaskMuTau2024(EmbeddingTask):
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2024/MuTau/merging/{self.branch}_merging.root")
+        return law.wlcg.WLCGFileTarget(f"2024/MuTau/merging/{self.branch}_merging_{self.output_file_suffix()}.root")
 
     def run(self):
         """Run the merging cmsdriver command"""
@@ -136,7 +136,7 @@ class MergingTaskMuTau2024(EmbeddingTask):
             step="USER:TauAnalysis/MCEmbeddingTools/Merging_USER_cff.merge_step,PAT",
             processName="MERGE",
             data=True,
-            conditions="auto:run3_data",
+            conditions="140X_dataRun3_v20",
             era="Run3_2024",
             eventcontent="TauEmbeddingMergeMINIAOD",
             datatier="USER",
@@ -150,8 +150,8 @@ class MergingTaskMuTau2024(EmbeddingTask):
     htcondor_walltime="900",
     htcondor_request_cpus="2",
     htcondor_request_memory="2GB",
-    htcondor_request_disk="300MB",
-    emb_files_per_job=20,
+    htcondor_request_disk="500MB",
+    emb_files_per_job=2,
     **condor_2024_param,
     **cmssw_2024_param_15,
 )
@@ -161,14 +161,14 @@ class NanoAODTaskMuTau2024(EmbeddingTask):
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2024/MuTau/nanoaod/{self.branch}_nanoaod.root")
+        return law.wlcg.WLCGFileTarget(f"2024/MuTau/nanoaod/{self.branch}_nanoaod_{self.output_file_suffix()}.root")
 
     def run(self):
         """Run the merging cmsdriver command"""
         self.run_cms_driver(
             step="NANO:@TauEmbedding",
             data=True,
-            conditions="auto:run3_data",
+            conditions="140X_dataRun3_v20",
             era="Run3_2024",
             eventcontent="TauEmbeddingNANOAOD",
             datatier="NANOAODSIM",
