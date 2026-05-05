@@ -25,7 +25,7 @@ class MiniAODwoEmbeddingTaskMuMu2024(EmbeddingTask):
     
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2024/MuMu_wo_embedding/miniaod/{self.branch}_miniaod.root")
+        return law.wlcg.WLCGFileTarget(f"2024/{self.dataset}/MuMu_wo_embedding/miniaod/{self.branch}_miniaod.root")
 
     def run(self):
         """Run the cleaning cmsdriver command"""
@@ -57,7 +57,7 @@ class NanoAODwoEmbeddingTaskMuMu2024(EmbeddingTask):
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2024/MuMu_wo_embedding/nanoaod/{self.branch}_nanoaod.root")
+        return law.wlcg.WLCGFileTarget(f"2024/{self.dataset}/MuMu_wo_embedding/nanoaod/{self.branch}_nanoaod.root")
 
     def run(self):
         """Run the merging cmsdriver command"""

@@ -46,6 +46,7 @@ class BundleCMSSWTask(
 
     cmssw_branch = luigi.Parameter(
         description="The CMSSW git branch to use with the chosen cmssw version",
+        default="master",
     )
 
     cmssw_scram_arch = luigi.Parameter(

@@ -27,7 +27,7 @@ class GenSimTaskMuTau2024(EmbeddingTask):
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2024/MuTau/gensim/{self.branch}_gensim_{self.output_file_suffix()}.root")
+        return law.wlcg.WLCGFileTarget(f"2024/{self.dataset}/MuTau/gensim/{self.branch}_gensim_{self.output_file_suffix()}.root")
 
     def run(self):
         """Run the gen cmsdriver command"""
@@ -61,7 +61,7 @@ class HLTSimTaskMuTau2024(EmbeddingTask):
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2024/MuTau/hltsim/{self.branch}_hltsim_{self.output_file_suffix()}.root")
+        return law.wlcg.WLCGFileTarget(f"2024/{self.dataset}/MuTau/hltsim/{self.branch}_hltsim_{self.output_file_suffix()}.root")
 
     def run(self):
         """Run the hlt cmsdriver command"""
@@ -94,7 +94,7 @@ class RecoSimTaskMuTau2024(EmbeddingTask):
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2024/MuTau/recosim/{self.branch}_recosim_{self.output_file_suffix()}.root")
+        return law.wlcg.WLCGFileTarget(f"2024/{self.dataset}/MuTau/recosim/{self.branch}_recosim_{self.output_file_suffix()}.root")
 
     def run(self):
         """Run the reco cmsdriver command"""
@@ -128,7 +128,7 @@ class MergingTaskMuTau2024(EmbeddingTask):
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2024/MuTau/merging/{self.branch}_merging_{self.output_file_suffix()}.root")
+        return law.wlcg.WLCGFileTarget(f"2024/{self.dataset}/MuTau/merging/{self.branch}_merging_{self.output_file_suffix()}.root")
 
     def run(self):
         """Run the merging cmsdriver command"""
@@ -161,7 +161,7 @@ class NanoAODTaskMuTau2024(EmbeddingTask):
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2024/MuTau/nanoaod/{self.branch}_nanoaod_{self.output_file_suffix()}.root")
+        return law.wlcg.WLCGFileTarget(f"2024/{self.dataset}/MuTau/nanoaod/{self.branch}_nanoaod_{self.output_file_suffix()}.root")
 
     def run(self):
         """Run the merging cmsdriver command"""

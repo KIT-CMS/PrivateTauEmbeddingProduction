@@ -6,7 +6,7 @@ from tasks.EmbeddingTasks.era2024.select_and_clean import (
     SelectionTask2024,
     condor_2024_param,
     cmssw_2024_param_HLT,
-    cmssw_2024_param_15
+    cmssw_2024_param_15,
 )
 from tasks.htcondor.htcondor import default_param
 
@@ -27,7 +27,7 @@ class CleaningTaskMuMu2024(EmbeddingTask):
     
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2024/MuMu/cleaning/{self.branch}_cleaning_{self.output_file_suffix()}.root")
+        return law.wlcg.WLCGFileTarget(f"2024/{self.dataset}/MuMu/cleaning/{self.branch}_cleaning_{self.output_file_suffix()}.root")
 
     def run(self):
         """Run the cleaning cmsdriver command"""
@@ -60,7 +60,7 @@ class GenSimTaskMuMu2024(EmbeddingTask):
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2024/MuMu/gensim/{self.branch}_gensim_{self.output_file_suffix()}.root")
+        return law.wlcg.WLCGFileTarget(f"2024/{self.dataset}/MuMu/gensim/{self.branch}_gensim_{self.output_file_suffix()}.root")
 
     def run(self):
         """Run the gen cmsdriver command"""
@@ -94,7 +94,7 @@ class HLTSimTaskMuMu2024(EmbeddingTask):
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2024/MuMu/hltsim/{self.branch}_hltsim_{self.output_file_suffix()}.root")
+        return law.wlcg.WLCGFileTarget(f"2024/{self.dataset}/MuMu/hltsim/{self.branch}_hltsim_{self.output_file_suffix()}.root")
 
     def run(self):
         """Run the hlt cmsdriver command"""
@@ -127,7 +127,7 @@ class RecoSimTaskMuMu2024(EmbeddingTask):
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2024/MuMu/recosim/{self.branch}_recosim_{self.output_file_suffix()}.root")
+        return law.wlcg.WLCGFileTarget(f"2024/{self.dataset}/MuMu/recosim/{self.branch}_recosim_{self.output_file_suffix()}.root")
 
     def run(self):
         """Run the reco cmsdriver command"""
@@ -161,7 +161,7 @@ class MergingTaskMuMu2024(EmbeddingTask):
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2024/MuMu/merging/{self.branch}_merging_{self.output_file_suffix()}.root")
+        return law.wlcg.WLCGFileTarget(f"2024/{self.dataset}/MuMu/merging/{self.branch}_merging_{self.output_file_suffix()}.root")
 
     def run(self):
         """Run the merging cmsdriver command"""
@@ -194,7 +194,7 @@ class NanoAODTaskMuMu2024(EmbeddingTask):
 
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2024/MuMu/nanoaod/{self.branch}_nanoaod_{self.output_file_suffix()}.root")
+        return law.wlcg.WLCGFileTarget(f"2024/{self.dataset}/MuMu/nanoaod/{self.branch}_nanoaod_{self.output_file_suffix()}.root")
 
     def run(self):
         """Run the merging cmsdriver command"""

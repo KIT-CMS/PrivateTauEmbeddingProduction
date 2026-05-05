@@ -16,17 +16,18 @@ condor_2024_param = {
     "htcondor_container_image": "/cvmfs/unpacked.cern.ch/registry.hub.docker.com/cmssw/cms:rhel8-m",
     "lcg_stack": "/cvmfs/sft.cern.ch/lcg/views/LCG_104/x86_64-centos8-gcc11-opt/setup.sh",
     "retries": 0,
+    "dataset": "Muon1",
 }
 cmssw_2024_param_HLT = {
-    "git_cmssw_hash": "0c40c8a67d1",
-    "cmssw_version": "CMSSW_14_0_21_patch4",
-    "cmssw_branch": "embedding_dev_CMSSW_14_0_X",
+    "git_cmssw_hash": "c48c52d",
+    "cmssw_version": "CMSSW_14_0_22_patch3",
+    # "cmssw_branch": "embedding_debug_hlt_14_0_X",
     "cmssw_scram_arch": "el8_amd64_gcc12",
 }
 cmssw_2024_param_15 = {
-    "git_cmssw_hash": "c52227a",
-    "cmssw_version": "CMSSW_15_0_15",
-    "cmssw_branch": "embedding_dev_CMSSW_15_0_4_p3_improveCode",
+    "git_cmssw_hash": "c126e7f",
+    "cmssw_version": "CMSSW_15_0_19_patch2",
+    # "cmssw_branch": "embedding_debug_hlt_15_0_X",
     "cmssw_scram_arch": "el8_amd64_gcc12",
 }
 
@@ -42,7 +43,8 @@ cmssw_2024_param_15 = {
 class SelectionTask2024(ETP_CMSSW_HTCondorWorkflow):
     """This class is the first step in the embedding workflow. Therfore can't inherit from EmbeddingTask"""
 
-    emb_filelist = "Muon0_Run2024C-v1_RAW_files_1_2_3.txt"
+    emb_filelist = "files.txt"
+    # emb_filelist = "Muon0_Run2024C-v1_RAW_files_1_2_3.txt"
 
     # This is the default and doesn't need to be set explicitly:
     # output_collection_cls = law.SiblingFileCollection
@@ -50,7 +52,7 @@ class SelectionTask2024(ETP_CMSSW_HTCondorWorkflow):
 
     def create_branch_map(self):
         """This branch map maps one file from the filelist in the filelists folder to one job (branch)"""
-        filelist_path = law.util.rel_path(__file__, "filelists/copied_to_disk", self.emb_filelist)
+        filelist_path = law.util.rel_path(__file__, f"filelists/{self.dataset}_rucio_output", self.emb_filelist)
         with open(filelist_path, "r") as f:
             files = [i.strip() for i in f.readlines() if i.strip()]
         return {i: file for i, file in enumerate(files)}
@@ -59,7 +61,7 @@ class SelectionTask2024(ETP_CMSSW_HTCondorWorkflow):
         """The path to the files the cmsdriver command is going to create"""
         hash_id = law.util.create_hash(self.branch_data)
         return law.wlcg.WLCGFileTarget(
-            f"2024/selection/{self.branch}_selection_{hash_id}.root"
+            f"2024/{self.dataset}/selection/{self.branch}_selection_{hash_id}.root"
         )
 
     def run(self):
@@ -93,7 +95,7 @@ class CleaningTaskTauTau2024(EmbeddingTask):
     
     def output(self):
         """The path to the files the cmsdriver command is going to create"""
-        return law.wlcg.WLCGFileTarget(f"2024/cleaning/{self.branch}_cleaning_{self.output_file_suffix()}.root")
+        return law.wlcg.WLCGFileTarget(f"2024/{self.dataset}/cleaning/{self.branch}_cleaning_{self.output_file_suffix()}.root")
 
     def run(self):
         """Run the cleaning cmsdriver command"""
