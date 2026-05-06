@@ -16,7 +16,7 @@ condor_2024_param = {
     "htcondor_container_image": "/cvmfs/unpacked.cern.ch/registry.hub.docker.com/cmssw/cms:rhel8-m",
     "lcg_stack": "/cvmfs/sft.cern.ch/lcg/views/LCG_104/x86_64-centos8-gcc11-opt/setup.sh",
     "retries": 0,
-    "dataset": "Muon1",
+    "dataset": "Muon0",
 }
 cmssw_2024_param_HLT = {
     "git_cmssw_hash": "c48c52d",
@@ -43,16 +43,19 @@ cmssw_2024_param_15 = {
 class SelectionTask2024(ETP_CMSSW_HTCondorWorkflow):
     """This class is the first step in the embedding workflow. Therfore can't inherit from EmbeddingTask"""
 
-    emb_filelist = "files.txt"
-    # emb_filelist = "Muon0_Run2024C-v1_RAW_files_1_2_3.txt"
-
     # This is the default and doesn't need to be set explicitly:
     # output_collection_cls = law.SiblingFileCollection
 
 
     def create_branch_map(self):
         """This branch map maps one file from the filelist in the filelists folder to one job (branch)"""
-        filelist_path = law.util.rel_path(__file__, f"filelists/{self.dataset}_rucio_output", self.emb_filelist)
+        if self.dataset == "Muon0":
+            filelist_path = law.util.rel_path(__file__, "filelists/Muon0_rucio_output/Muon0_Run2024C-v1_RAW_files_1_2_3.txt")
+        elif self.dataset == "Muon1":
+            filelist_path = law.util.rel_path(__file__, "filelists/Muon1_rucio_output/files.txt")
+        else:
+            raise ValueError(f"Dataset {self.dataset} not supported. Supported datasets are: Muon0 and Muon1")
+        
         with open(filelist_path, "r") as f:
             files = [i.strip() for i in f.readlines() if i.strip()]
         return {i: file for i, file in enumerate(files)}
