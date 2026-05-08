@@ -89,7 +89,7 @@ class ETP_HTCondorWorkflow(law.htcondor.HTCondorWorkflow):
     )
     
     # set Law options
-    # output_collection_cls = law.SiblingFileCollection # is this needed? It's not used by law at all
+    output_collection_cls = law.SiblingFileCollection # this is needed to tell law that the outputs of an HTCondorWorkflow are all in the same folder. Law then can use one stat or ls command on the folder and doesn't need to stat each file separately, which would be very inefficient for large number of files.
     create_branch_map_before_repr = True
     """The branch map should be created before the task representation is created via :py:meth:`repr`."""
 
