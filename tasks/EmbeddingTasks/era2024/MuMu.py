@@ -1,6 +1,5 @@
 
 import law
-import luigi
 from tasks.EmbeddingTasks import EmbeddingTask
 from tasks.EmbeddingTasks.era2024.select_and_clean import (
     SelectionTask2024,
@@ -205,6 +204,7 @@ class NanoAODTaskMuMu2024(EmbeddingTask):
             era="Run3_2024",
             eventcontent="TauEmbeddingNANOAOD",
             datatier="NANOAODSIM",
+            procModifiers="tau_embedding_merging",
             filein=",".join(self.get_input_files()),
             number=self.emb_number_of_events,
         )

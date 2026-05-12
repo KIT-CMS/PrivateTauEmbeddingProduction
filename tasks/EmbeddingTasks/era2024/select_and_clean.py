@@ -1,5 +1,4 @@
 import law
-import luigi
 from tasks.EmbeddingTasks import EmbeddingTask
 from tasks.htcondor.cmssw import ETP_CMSSW_HTCondorWorkflow
 from tasks.htcondor.htcondor import default_param

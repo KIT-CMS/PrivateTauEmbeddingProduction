@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# filepath: /work/cwinter/embedding/PrivateTauEmbeddingProduction/condor_job_ressource_usage_analysis.py
 
 import re
 import argparse

@@ -19,19 +19,20 @@ class BundleCMSSWTask(
         default="",
         description="path to a sandbox file to be used for the job; default: ''",
     )
-    singularity_args = lambda x: [
-        "-B",
-        "/cvmfs",
-        "-B",
-        os.getcwd(),
-        "-B",
-        "/home/cwinter/.globus/x509up",
-    ]
+    def singularity_args(x):
+        return [
+            "-B",
+            "/cvmfs",
+            "-B",
+            os.getcwd(),
+            "-B",
+            os.getenv("X509_USER_PROXY"),
+        ]
 
     def sandbox_post_setup_cmds(self):
         bootstrap_file = law.util.rel_path(__file__, "setup_cmssw.sh")
         return [
-            "export X509_USER_PROXY=/home/cwinter/.globus/x509up",
+            f"export X509_USER_PROXY={os.getenv('X509_USER_PROXY')}",
             f"source {bootstrap_file} {self.cmssw_version} {self.cmssw_branch} {self.cmssw_scram_arch} {self.n_compile_cores}",
         ]
 
