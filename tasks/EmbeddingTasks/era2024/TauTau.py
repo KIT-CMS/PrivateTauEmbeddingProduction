@@ -1,0 +1,178 @@
+
+import law
+from tasks.EmbeddingTasks import EmbeddingTask
+from tasks.EmbeddingTasks.era2024.select_and_clean import (
+    CleaningTaskTauTau2024,
+    condor_2024_param,
+    cmssw_2024_param_HLT,
+    cmssw_2024_param_15
+)
+from tasks.htcondor.htcondor import default_param
+
+logger = law.logger.get_logger(__name__)
+
+
+@default_param(
+    htcondor_walltime="4800",
+    htcondor_request_cpus="8",
+    htcondor_request_memory="8GB",
+    htcondor_request_disk="70GB",
+    emb_files_per_job=3,
+    **condor_2024_param,
+    **cmssw_2024_param_HLT,
+)
+class GenSimTaskTauTau2024(EmbeddingTask):
+    
+    RequiredTask = CleaningTaskTauTau2024
+
+    def output(self):
+        """The path to the files the cmsdriver command is going to create"""
+        return law.wlcg.WLCGFileTarget(f"2024/{self.dataset}/TauTau/gensim/{self.branch}_gensim_{self.output_file_suffix()}.root")
+
+    def run(self):
+        """Run the gen cmsdriver command"""
+        self.run_cms_driver(
+            "TauAnalysis/MCEmbeddingTools/python/Simulation_GEN_cfi.py",
+            step="GEN,SIM,DIGI,L1,DIGI2RAW",
+            processName="SIMembeddingpreHLT",
+            mc=True,
+            beamspot="DBrealistic",
+            geometry="DB:Extended",
+            era="Run3_2024",
+            conditions="140X_mcRun3_2024_realistic_v26", # same Global Tag as in HLTSimTask!
+            eventcontent="TauEmbeddingSimGen",
+            datatier="RAWSIM",
+            procModifiers="tau_embedding_sim,tau_embedding_tauhtauh",
+            filein=",".join(self.get_input_files()),
+            number=self.emb_number_of_events,
+        )
+
+@default_param(
+    htcondor_walltime="7800",
+    htcondor_request_cpus="4",
+    htcondor_request_memory="6GB",
+    htcondor_request_disk="70GB",
+    **condor_2024_param,
+    **cmssw_2024_param_HLT,
+)
+class HLTSimTaskTauTau2024(EmbeddingTask):
+    
+    RequiredTask = GenSimTaskTauTau2024
+
+    def output(self):
+        """The path to the files the cmsdriver command is going to create"""
+        return law.wlcg.WLCGFileTarget(f"2024/{self.dataset}/TauTau/hltsim/{self.branch}_hltsim_{self.output_file_suffix()}.root")
+
+    def run(self):
+        """Run the hlt cmsdriver command"""
+        # step and conditions taken from https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_setup/EGM-Run3Summer22EEDRPremix-00004 (see recomended sample: https://twiki.cern.ch/twiki/bin/viewauth/CMS/MuonRun32022#MC)
+        self.run_cms_driver(
+            step="HLT:2024v14+TauAnalysis/MCEmbeddingTools/Simulation_HLT_customiser_cff.embeddingHLTCustomiser",
+            processName="SIMembeddingHLT",
+            mc=True,
+            beamspot="DBrealistic",
+            geometry="DB:Extended",
+            era="Run3_2024",
+            conditions="140X_mcRun3_2024_realistic_v26",
+            eventcontent="TauEmbeddingSimHLT",
+            datatier="RAWSIM",
+            filein=",".join(self.get_input_files()),
+            number=self.emb_number_of_events,
+        )
+
+@default_param(
+    htcondor_walltime="6700",
+    htcondor_request_cpus="2",
+    htcondor_request_memory="4GB",
+    htcondor_request_disk="70GB",
+    **condor_2024_param,
+    **cmssw_2024_param_HLT,
+)
+class RecoSimTaskTauTau2024(EmbeddingTask):
+
+    RequiredTask = HLTSimTaskTauTau2024
+
+    def output(self):
+        """The path to the files the cmsdriver command is going to create"""
+        return law.wlcg.WLCGFileTarget(f"2024/{self.dataset}/TauTau/recosim/{self.branch}_recosim_{self.output_file_suffix()}.root")
+
+    def run(self):
+        """Run the reco cmsdriver command"""
+        self.run_cms_driver(
+            step="RAW2DIGI,L1Reco,RECO,RECOSIM",
+            processName="SIMembedding",
+            mc=True,
+            beamspot="DBrealistic",
+            geometry="DB:Extended",
+            era="Run3_2024",
+            conditions="140X_mcRun3_2024_realistic_v26",
+            eventcontent="TauEmbeddingSimReco",
+            datatier="RAW-RECO-SIM",
+            procModifiers="tau_embedding_sim",
+            filein=",".join(self.get_input_files()),
+            number=self.emb_number_of_events,
+        )
+
+@default_param(
+    htcondor_walltime="4200",
+    htcondor_request_cpus="1",
+    htcondor_request_memory="4GB",
+    htcondor_request_disk="2GB",
+    emb_files_per_job=5,
+    **condor_2024_param,
+    **cmssw_2024_param_15,
+)
+class MergingTaskTauTau2024(EmbeddingTask):
+    
+    RequiredTask = RecoSimTaskTauTau2024
+
+    def output(self):
+        """The path to the files the cmsdriver command is going to create"""
+        return law.wlcg.WLCGFileTarget(f"2024/{self.dataset}/TauTau/merging/{self.branch}_merging_{self.output_file_suffix()}.root")
+
+    def run(self):
+        """Run the merging cmsdriver command"""
+        self.run_cms_driver(
+            step="USER:TauAnalysis/MCEmbeddingTools/Merging_USER_cff.merge_step,PAT",
+            processName="MERGE",
+            data=True,
+            conditions="140X_dataRun3_v20",
+            era="Run3_2024",
+            eventcontent="TauEmbeddingMergeMINIAOD",
+            datatier="USER",
+            procModifiers="tau_embedding_merging",
+            inputCommands="'keep *_*_*_*'",
+            filein=",".join(self.get_input_files()),
+            number=self.emb_number_of_events,
+        )
+
+@default_param(
+    htcondor_walltime="900",
+    htcondor_request_cpus="2",
+    htcondor_request_memory="2GB",
+    htcondor_request_disk="500MB",
+    emb_files_per_job=2,
+    **condor_2024_param,
+    **cmssw_2024_param_15,
+)
+class NanoAODTaskTauTau2024(EmbeddingTask):
+    
+    RequiredTask = MergingTaskTauTau2024
+
+    def output(self):
+        """The path to the files the cmsdriver command is going to create"""
+        return law.wlcg.WLCGFileTarget(f"2024/{self.dataset}/TauTau/nanoaod/{self.branch}_nanoaod_{self.output_file_suffix()}.root")
+
+    def run(self):
+        """Run the merging cmsdriver command"""
+        self.run_cms_driver(
+            step="NANO:@TauEmbedding",
+            data=True,
+            conditions="140X_dataRun3_v20",
+            era="Run3_2024",
+            eventcontent="TauEmbeddingNANOAOD",
+            datatier="NANOAODSIM",
+            procModifiers="tau_embedding_merging",
+            filein=",".join(self.get_input_files()),
+            number=self.emb_number_of_events,
+        )

@@ -14,7 +14,7 @@ condor_2024_param = {
     "htcondor_accounting_group": "cms.higgs",
     "htcondor_container_image": "/cvmfs/unpacked.cern.ch/registry.hub.docker.com/cmssw/cms:rhel8-m",
     "lcg_stack": "/cvmfs/sft.cern.ch/lcg/views/LCG_104/x86_64-centos8-gcc11-opt/setup.sh",
-    "retries": 0,
+    "retries": 3,
     "dataset": "Muon0",
 }
 cmssw_2024_param_HLT = {
